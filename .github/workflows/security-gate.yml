@@ -1,0 +1,26 @@
+name: Security Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  staged-security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Simulate staged files from commit diff
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}" --depth=1
+            git diff --name-only "origin/${{ github.base_ref }}...HEAD" | xargs -r git add
+          else
+            git add -A
+          fi
+
+      - name: Run staged secret checks
+        run: ./scripts/check-staged-security.sh

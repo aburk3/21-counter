@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+.pytest_cache/
+
+# Node
+node_modules/
+coverage/
+
+# Env
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.service-account.json
+
+# OS
+.DS_Store
+
+# Frontend build output
+frontend/dist/
+frontend/.vite/
+frontend/*.tsbuildinfo
+
+# Local tooling
+.idea/
+.vscode/
