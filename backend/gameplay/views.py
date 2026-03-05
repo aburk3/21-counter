@@ -26,8 +26,10 @@ from gameplay.state import (
     init_state,
     place_bet,
     save_state,
+    shuffle_remaining_cards,
     view_payload,
 )
+from gameplay.strategy_feedback import summarize_strategy_decisions
 from progress.models import ProgressEvent
 from users.progression import rank_from_xp
 
@@ -212,10 +214,8 @@ class SessionSubmitCountView(APIView):
         )
 
         decisions = round_state.get("decisions", [])
-        first = (
-            decisions[0]
-            if decisions
-            else {"action": "", "recommended": "", "correct": False}
+        strategy_correct, played_action, correct_action = summarize_strategy_decisions(
+            decisions
         )
 
         round_obj = Round.objects.create(
@@ -230,11 +230,9 @@ class SessionSubmitCountView(APIView):
             ),
             result=round_state["result"],
             net_chips_delta=round_state["chips_delta"],
-            basic_strategy_correct=(
-                all(item["correct"] for item in decisions) if decisions else False
-            ),
-            user_action_taken=first["action"],
-            correct_action=first["recommended"],
+            basic_strategy_correct=strategy_correct,
+            user_action_taken=played_action,
+            correct_action=correct_action,
             dealer_upcard=round_state["dealer_hand"][0],
             player_starting_hand=",".join(round_state["user_hands"][0]["cards"][:2]),
         )
@@ -314,9 +312,9 @@ class SessionSubmitCountView(APIView):
                 "is_correct": count_correct,
                 "actual_running_count": actual,
                 "round_time_ms": round_obj.duration_ms,
-                "strategy_correct": round_obj.basic_strategy_correct,
-                "played_action": round_obj.user_action_taken,
-                "correct_action": round_obj.correct_action,
+                "strategy_correct": strategy_correct,
+                "played_action": played_action,
+                "correct_action": correct_action,
                 "chips_balance": profile.chips_balance,
                 "xp": profile.xp,
                 "rank": profile.rank,
@@ -344,7 +342,8 @@ class SessionNextRoundView(APIView):
 
         if (
             state["current_shoe"] >= state["shoes_per_session"]
-            and len(state["shoe_cards"]) <= 52
+            and len(state["shoe_cards"])
+            <= shuffle_remaining_cards(state["decks_per_shoe"])
         ):
             rounds = session.rounds.all()
             total_rounds = rounds.count()

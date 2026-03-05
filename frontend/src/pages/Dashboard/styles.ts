@@ -1,133 +1,108 @@
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 
-const panelIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const messageIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(-2px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
+import { GlassSurface } from "@/components/ui/GlassSurface";
 
 const Wrap = styled.main`
-  padding: 20px;
-
-  @media ${({ theme }) => theme.media.sm} {
-    padding: 12px;
-  }
+  display: grid;
+  gap: 16px;
 `;
 
-const TopBar = styled.div`
+const Hero = styled(GlassSurface)`
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+`;
+
+const HeroTop = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 10px;
   flex-wrap: wrap;
 `;
 
-const Grid = styled.section`
-  margin-top: 18px;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+const HeroActions = styled.div`
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
 
-  @media ${({ theme }) => theme.media.sm} {
-    grid-template-columns: 1fr;
-    gap: 10px;
+const HeroMeta = styled.div`
+  display: grid;
+  gap: 8px;
+
+  p {
+    margin: 0;
+    color: ${({ theme }) => theme.colors.textSecondary};
   }
+`;
+
+const HeroStats = styled.div`
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 
   @media ${({ theme }) => theme.media.lg} {
-    grid-template-columns: repeat(2, minmax(220px, 1fr));
-  }
-`;
-
-const Actions = styled.div`
-  margin-top: 22px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-`;
-
-const Button = styled.button`
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  color: ${({ theme }) => theme.colors.text};
-  padding: 11px 13px;
-  min-height: 44px;
-  cursor: pointer;
-  transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.28);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
-  }
-`;
-
-const Panel = styled.section`
-  border: 1px solid ${({ theme }) => theme.colors.panelBorder};
-  border-radius: ${({ theme }) => theme.radius.panel};
-  background: ${({ theme }) => theme.colors.panel};
-  backdrop-filter: blur(10px);
-  padding: 14px;
-  display: grid;
-  gap: 10px;
-  animation: ${panelIn} 220ms ease both;
-
-  @media ${({ theme }) => theme.media.sm} {
-    padding: 12px;
+    grid-template-columns: 1fr;
   }
 `;
 
 const ProgressBar = styled.div`
   width: 100%;
-  height: 10px;
+  height: 12px;
   border-radius: ${({ theme }) => theme.radius.pill};
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
   overflow: hidden;
 `;
 
 const ProgressFill = styled.div<{ $pct: number }>`
   width: ${({ $pct }) => Math.max(0, Math.min($pct, 100))}%;
   height: 100%;
-  background: linear-gradient(90deg, #88ddff, #a8ffc6);
-  transition: width 420ms ease;
+  background: linear-gradient(90deg, #93fff2, #7ad4ff);
+  transition: width 320ms ease;
+`;
+
+const Grid = styled.section`
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+`;
+
+const ZoneGrid = styled.section`
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @media ${({ theme }) => theme.media.lg} {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const Panel = styled(GlassSurface)`
+  padding: 14px;
+  display: grid;
+  gap: 10px;
 `;
 
 const SkinList = styled.div`
   display: grid;
-  gap: 8px;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(140px, 1fr);
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
 `;
 
-const SkinItem = styled.button<{ $locked: boolean }>`
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
-  padding: 8px 10px;
+const SkinItem = styled.button<{ $locked: boolean; $selected: boolean }>`
+  border: 1px solid
+    ${({ $selected }) => ($selected ? "rgba(133, 255, 236, 0.8)" : "rgba(255, 255, 255, 0.3)")};
+  border-radius: ${({ theme }) => theme.radius.md};
+  padding: 10px;
   color: ${({ theme, $locked }) => ($locked ? theme.colors.textSubtle : theme.colors.text)};
   opacity: ${({ $locked }) => ($locked ? 0.6 : 1)};
-  background: rgba(255, 255, 255, 0.08);
+  background: ${({ $selected }) => ($selected ? "rgba(101, 245, 223, 0.22)" : "rgba(255, 255, 255, 0.08)")};
   text-align: left;
   cursor: ${({ $locked }) => ($locked ? "not-allowed" : "pointer")};
-  transition: transform 180ms ease, background 180ms ease;
-
-  &:not(:disabled):hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.14);
-  }
 `;
 
 const SkinItemBody = styled.div`
@@ -147,152 +122,89 @@ const SkinPreviewCard = styled.div<{ $skin: string }>`
       {
         base: string;
         glyph: string;
-        edge: string;
-        holo: string;
-        sheen: string;
       }
     > = {
       classic_red: {
         base: "#ffffff",
         glyph: "#c81f2d",
-        edge: "rgba(200, 31, 45, 0.35)",
-        holo: "none",
-        sheen: "none",
       },
       ocean_blue: {
-        base:
-          "linear-gradient(160deg, rgba(247,252,255,0.98), rgba(231,245,255,0.94))",
+        base: "linear-gradient(160deg, rgba(247,252,255,0.98), rgba(231,245,255,0.94))",
         glyph: "#0f65a8",
-        edge: "rgba(105, 194, 255, 0.6)",
-        holo:
-          "linear-gradient(125deg, rgba(119,244,255,0.3), rgba(109,151,255,0.25), rgba(255,255,255,0.2))",
-        sheen:
-          "linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(170,236,255,0.62) 50%, rgba(255,255,255,0) 65%)",
       },
       obsidian: {
-        base:
-          "linear-gradient(160deg, rgba(32,34,40,0.96), rgba(58,62,70,0.9))",
+        base: "linear-gradient(160deg, rgba(32,34,40,0.96), rgba(58,62,70,0.9))",
         glyph: "#e8edf3",
-        edge: "rgba(220, 229, 240, 0.58)",
-        holo:
-          "linear-gradient(125deg, rgba(194,226,255,0.2), rgba(255,255,255,0.14), rgba(110,125,162,0.2))",
-        sheen:
-          "linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(246,250,255,0.58) 50%, rgba(255,255,255,0) 65%)",
       },
       emerald: {
-        base:
-          "linear-gradient(160deg, rgba(241,255,247,0.98), rgba(223,249,237,0.94))",
+        base: "linear-gradient(160deg, rgba(241,255,247,0.98), rgba(223,249,237,0.94))",
         glyph: "#16845d",
-        edge: "rgba(85, 219, 170, 0.58)",
-        holo:
-          "linear-gradient(125deg, rgba(131,255,214,0.28), rgba(123,229,187,0.2), rgba(255,255,255,0.2))",
-        sheen:
-          "linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(180,255,221,0.62) 50%, rgba(255,255,255,0) 65%)",
       },
       gold: {
-        base:
-          "linear-gradient(160deg, rgba(255,248,219,0.98), rgba(247,228,153,0.92))",
+        base: "linear-gradient(160deg, rgba(255,248,219,0.98), rgba(247,228,153,0.92))",
         glyph: "#b7871a",
-        edge: "rgba(229, 189, 86, 0.65)",
-        holo:
-          "linear-gradient(125deg, rgba(255,224,133,0.25), rgba(255,255,255,0.24), rgba(232,177,66,0.22))",
-        sheen:
-          "linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(255,241,181,0.66) 50%, rgba(255,255,255,0) 65%)",
       },
     };
     const tone = palette[$skin] ?? palette.classic_red;
     return `
       background: ${tone.base};
       color: ${tone.glyph};
-      border-color: ${tone.edge};
-      --holo-layer: ${tone.holo};
-      --sheen-layer: ${tone.sheen};
     `;
   }}
-  width: 44px;
-  height: 64px;
+  width: 42px;
+  height: 60px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   font-size: 12px;
   font-weight: 800;
   display: grid;
   place-items: center;
-  position: relative;
-  overflow: hidden;
-  transition: transform 180ms ease, box-shadow 180ms ease;
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: ${({ $skin }) => ($skin === "classic_red" ? 0 : 0.32)};
-    background: var(--holo-layer);
-    mix-blend-mode: screen;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: -20px;
-    background: var(--sheen-layer);
-    pointer-events: none;
-    opacity: 0;
-    transform: translateX(-130%);
-    transition: transform 380ms ease, opacity 220ms ease;
-  }
-
-  ${SkinItem}:not(:disabled):hover & {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  }
-
-  ${SkinItem}:not(:disabled):hover &::after {
-    opacity: ${({ $skin }) => ($skin === "classic_red" ? 0 : 1)};
-    transform: translateX(160%);
-  }
 `;
 
 const Message = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.success};
-  animation: ${messageIn} 220ms ease;
 `;
 
 const ErrorText = styled.p`
-  margin: 0;
   color: ${({ theme }) => theme.colors.danger};
+  margin: 0;
 `;
 
 const ModalBackdrop = styled.div`
   position: fixed;
   inset: 0;
+  background: rgba(2, 14, 11, 0.56);
   display: grid;
   place-items: center;
-  background: rgba(0, 0, 0, 0.5);
   z-index: 40;
 `;
 
-const ModalCard = styled.section`
-  width: min(420px, calc(100vw - 24px));
-  border: 1px solid ${({ theme }) => theme.colors.panelBorder};
-  border-radius: ${({ theme }) => theme.radius.panel};
-  background: ${({ theme }) => theme.colors.panel};
-  backdrop-filter: blur(14px);
-  padding: 18px;
+const ModalCard = styled(GlassSurface)`
+  width: min(560px, calc(100vw - 16px));
+  padding: 22px;
   display: grid;
-  gap: 12px;
+  gap: 14px;
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 `;
 
 export {
   Wrap,
-  TopBar,
-  Grid,
-  Actions,
-  Button,
-  Panel,
+  Hero,
+  HeroTop,
+  HeroActions,
+  HeroMeta,
+  HeroStats,
   ProgressBar,
   ProgressFill,
+  Grid,
+  ZoneGrid,
+  Panel,
   SkinList,
   SkinItem,
   SkinItemBody,
@@ -302,4 +214,5 @@ export {
   ErrorText,
   ModalBackdrop,
   ModalCard,
+  ModalActions,
 };

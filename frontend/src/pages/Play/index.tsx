@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { ActionPanel } from "@/components/ActionPanel";
@@ -6,26 +6,30 @@ import { BlackjackTable } from "@/components/BlackjackTable";
 import { ChipTray } from "@/components/ChipTray";
 import { RoundSummaryDialog } from "@/components/RoundSummaryDialog";
 import { SetupDialog } from "@/components/SetupDialog";
-import { api } from "@/lib/api";
+import { GlassBadge } from "@/components/ui/GlassBadge";
+import { GlassButton } from "@/components/ui/GlassButton";
 import { usePlaySession } from "@/hooks/usePlaySession";
+import { api } from "@/lib/api";
 import { PLAY_PAGE_TEXT } from "./constants";
 
 import {
   ActionRow,
   Caption,
-  ContinueCountButton,
+  Dock,
+  DockLabel,
+  DockRow,
+  DockSection,
   ErrorText,
-  ExitButton,
+  HintCard,
   Layout,
-  Section,
-  SidePanel,
-  SettingsButton,
   SummaryBackdrop,
   SummaryCard,
   SummaryGrid,
   SummaryItem,
-  TopBar,
-  TopActions,
+  TableRegion,
+  UtilityActions,
+  UtilityBar,
+  UtilityMeta,
   Wrap,
 } from "./styles";
 
@@ -38,6 +42,7 @@ const Play = () => {
   const navigate = useNavigate();
   const [showSetup, setShowSetup] = useState(false);
   const [defaults, setDefaults] = useState(DEFAULT_SETUP);
+  const [hintFlags, setHintFlags] = useState({ strategy: false, count: false, pace: false });
   const {
     state,
     chips,
@@ -90,79 +95,122 @@ const Play = () => {
     };
   }, [setSelectedSkin]);
 
+  useEffect(() => {
+    if (!feedback) return;
+    setHintFlags((prev) => ({
+      strategy: prev.strategy || !feedback.strategy_correct,
+      count: prev.count || !feedback.is_correct,
+      pace: prev.pace || feedback.round_time_ms > 12000,
+    }));
+  }, [feedback]);
+
   const canDeal = Boolean(state) && !state?.active_round && !state?.round_ready_for_submission;
+
+  const roundStatus = useMemo(() => {
+    if (showResolvedOverlay || state?.round_ready_for_submission) {
+      return PLAY_PAGE_TEXT.ROUND_STATUS.READY_SUBMIT;
+    }
+    if (!state?.active_round) {
+      return PLAY_PAGE_TEXT.ROUND_STATUS.WAITING;
+    }
+    if (state.active_round.phase === "user_turn") {
+      return PLAY_PAGE_TEXT.ROUND_STATUS.USER_TURN;
+    }
+    return PLAY_PAGE_TEXT.ROUND_STATUS.TABLE_TURN;
+  }, [showResolvedOverlay, state]);
+
+  const hint = useMemo(() => {
+    if (hintFlags.strategy) return PLAY_PAGE_TEXT.HINT_STRATEGY;
+    if (hintFlags.count) return PLAY_PAGE_TEXT.HINT_COUNT;
+    if (hintFlags.pace) return PLAY_PAGE_TEXT.HINT_PACE;
+    return null;
+  }, [hintFlags]);
 
   return (
     <Wrap>
-      <TopBar>
-        <h1>{PLAY_PAGE_TEXT.TITLE}</h1>
-        <TopActions>
-          <SettingsButton
+      <UtilityBar $elevation={2}>
+        <UtilityMeta>
+          <span>{PLAY_PAGE_TEXT.SESSION_PROGRESS(state?.round_number ?? 1)}</span>
+          <strong>{roundStatus}</strong>
+        </UtilityMeta>
+        <UtilityActions>
+          <GlassBadge>{`Timer ${(timerMs / 1000).toFixed(2)}s`}</GlassBadge>
+          <GlassBadge>{`Table Bet $${state?.current_bet ?? 0}`}</GlassBadge>
+          <GlassBadge>{`Session ${gainLoss >= 0 ? "+" : ""}$${gainLoss}`}</GlassBadge>
+          <GlassButton
             aria-label={PLAY_PAGE_TEXT.OPEN_SETTINGS}
             onClick={() => setShowSetup(true)}
+            $variant="secondary"
           >
             {PLAY_PAGE_TEXT.SETTINGS_ICON}
-          </SettingsButton>
-          <ExitButton
+          </GlassButton>
+          <GlassButton
+            $variant="destructive"
             onClick={() => {
               void exitSession();
             }}
           >
             {PLAY_PAGE_TEXT.EXIT_SESSION}
-          </ExitButton>
-        </TopActions>
-      </TopBar>
-      <Layout>
-        <BlackjackTable
-          state={state}
-          chips={chips}
-          timerMs={timerMs}
-          totalGainLoss={gainLoss}
-          skin={selectedSkin}
-        />
+          </GlassButton>
+        </UtilityActions>
+      </UtilityBar>
 
-        <SidePanel>
-          <Section>
-            {showResolvedOverlay ? (
-              <ContinueCountButton onClick={() => setShowCountDialog(true)}>
-                {PLAY_PAGE_TEXT.CONFIRM_COUNT_CONTINUE}
-              </ContinueCountButton>
-            ) : null}
-            {canDeal ? (
-              <ContinueCountButton disabled={isDealing} onClick={() => void deal()}>
-                {PLAY_PAGE_TEXT.DEAL}
-              </ContinueCountButton>
-            ) : null}
-            <h2>{PLAY_PAGE_TEXT.WAGER_TITLE}</h2>
+      <Layout>
+        <TableRegion>
+          <BlackjackTable
+            state={state}
+            chips={chips}
+            timerMs={timerMs}
+            skin={selectedSkin}
+          />
+        </TableRegion>
+
+        <Dock $elevation={2}>
+          {hint ? <HintCard $elevation={1}>{hint}</HintCard> : null}
+
+          <DockSection>
+            <DockRow>
+              <DockLabel>{PLAY_PAGE_TEXT.WAGER_TITLE}</DockLabel>
+              <GlassBadge>{`Chips $${chips}`}</GlassBadge>
+            </DockRow>
             <Caption>{PLAY_PAGE_TEXT.WAGER_HELP}</Caption>
             <ChipTray
-              onBet={placeBet}
-              chips={chips}
+              currentBet={Math.max(state?.current_bet ?? 25, 25)}
+              maxBet={chips}
+              minBet={25}
+              onChangeBet={(nextBet) => {
+                void placeBet(nextBet);
+              }}
               locked={Boolean(state?.active_round)}
             />
-          </Section>
-          <Section>
-            <h2>{PLAY_PAGE_TEXT.ACTIONS_TITLE}</h2>
+          </DockSection>
+
+          <DockSection>
+            <DockLabel>{PLAY_PAGE_TEXT.ACTIONS_TITLE}</DockLabel>
             {state?.active_round &&
             state.active_round.phase === "user_turn" &&
             !state.active_round.resolved ? (
               <ActionPanel actions={state.active_round.legal_actions} onAction={action} />
-            ) : null}
-          </Section>
-          {error ? <ErrorText>{error}</ErrorText> : null}
-        </SidePanel>
-      </Layout>
+            ) : (
+              <Caption>Actions unlock when it is your turn.</Caption>
+            )}
+          </DockSection>
 
-      {showSetup ? (
-        <SetupDialog
-          defaults={defaults}
-          onContinue={(payload) => {
-            setDefaults(payload);
-            void createSession(payload);
-            setShowSetup(false);
-          }}
-        />
-      ) : null}
+          {showResolvedOverlay ? (
+            <GlassButton $variant="primary" onClick={() => setShowCountDialog(true)}>
+              {PLAY_PAGE_TEXT.CONFIRM_COUNT_CONTINUE}
+            </GlassButton>
+          ) : null}
+
+          {canDeal ? (
+            <GlassButton $variant="primary" disabled={isDealing} onClick={() => void deal()}>
+              {PLAY_PAGE_TEXT.DEAL}
+            </GlassButton>
+          ) : null}
+
+          {error ? <ErrorText>{error}</ErrorText> : null}
+        </Dock>
+      </Layout>
 
       {state?.round_ready_for_submission && showCountDialog ? (
         <RoundSummaryDialog
@@ -181,27 +229,58 @@ const Play = () => {
 
       {sessionComplete && sessionSummary ? (
         <SummaryBackdrop>
-          <SummaryCard>
+          <SummaryCard $elevation={3}>
             <h3>{PLAY_PAGE_TEXT.SESSION_SUMMARY}</h3>
             <SummaryGrid>
-              <SummaryItem>{PLAY_PAGE_TEXT.summaryGainLoss(sessionSummary.gainLoss)}</SummaryItem>
-              <SummaryItem>
+              <SummaryItem $elevation={1}>{PLAY_PAGE_TEXT.summaryGainLoss(sessionSummary.gainLoss)}</SummaryItem>
+              <SummaryItem $elevation={1}>
                 {PLAY_PAGE_TEXT.summaryCountAccuracy(sessionSummary.countAccuracyPct)}
               </SummaryItem>
-              <SummaryItem>
+              <SummaryItem $elevation={1}>
                 {PLAY_PAGE_TEXT.summaryPlayAccuracy(sessionSummary.playAccuracyPct)}
               </SummaryItem>
-              <SummaryItem>
+              <SummaryItem $elevation={1}>
                 {PLAY_PAGE_TEXT.summaryRoundsPlayed(sessionSummary.totalRounds)}
               </SummaryItem>
             </SummaryGrid>
             <ActionRow>
-              <ExitButton onClick={() => navigate("/dashboard")}>
+              <GlassButton
+                $variant="primary"
+                onClick={() => {
+                  setHintFlags({ strategy: false, count: false, pace: false });
+                  void createSession(defaults);
+                }}
+              >
+                {PLAY_PAGE_TEXT.PLAY_AGAIN}
+              </GlassButton>
+              <GlassButton $variant="secondary" onClick={() => navigate("/dashboard")}>
                 {PLAY_PAGE_TEXT.RETURN_DASHBOARD}
-              </ExitButton>
+              </GlassButton>
+              <GlassButton $variant="ghost" onClick={() => setShowSetup(true)}>
+                {PLAY_PAGE_TEXT.CHANGE_SETUP}
+              </GlassButton>
             </ActionRow>
           </SummaryCard>
         </SummaryBackdrop>
+      ) : null}
+
+      {showSetup ? (
+        <SetupDialog
+          defaults={defaults}
+          onContinue={(payload) => {
+            setDefaults(payload);
+            setHintFlags({ strategy: false, count: false, pace: false });
+            void createSession(payload);
+            setShowSetup(false);
+          }}
+          onSaveDefault={(payload) => {
+            void api.updateSettings({
+              default_decks_per_shoe: payload.decks_per_shoe,
+              default_hands_dealt: payload.hands_dealt,
+            });
+          }}
+          onCancel={() => setShowSetup(false)}
+        />
       ) : null}
     </Wrap>
   );

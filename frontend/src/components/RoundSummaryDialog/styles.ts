@@ -1,27 +1,21 @@
 import styled from "styled-components";
 
+import { GlassSurface } from "@/components/ui/GlassSurface";
+
 const Backdrop = styled.div`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
   display: grid;
   place-items: center;
+  z-index: 40;
 `;
 
-const Dialog = styled.div`
-  width: min(560px, calc(100vw - 16px));
-  border: 1px solid ${({ theme }) => theme.colors.panelBorder};
-  border-radius: ${({ theme }) => theme.radius.panel};
-  background: ${({ theme }) => theme.colors.panel};
-  backdrop-filter: blur(12px);
+const Dialog = styled(GlassSurface)`
+  width: min(580px, calc(100vw - 16px));
   padding: 24px;
   display: grid;
   gap: 14px;
-
-  @media ${({ theme }) => theme.media.sm} {
-    padding: 16px;
-    gap: 10px;
-  }
 `;
 
 const Field = styled.label`
@@ -31,8 +25,8 @@ const Field = styled.label`
 
 const Input = styled.input`
   border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
+  border-radius: ${({ theme }) => theme.radius.sm};
+  background: rgba(255, 255, 255, 0.16);
   color: ${({ theme }) => theme.colors.text};
   padding: 11px 12px;
 
@@ -41,13 +35,33 @@ const Input = styled.input`
   }
 `;
 
-const Result = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 12px;
+const ResultGrid = styled.div`
+  display: grid;
+  gap: 8px;
+`;
+
+const ResultItem = styled(GlassSurface)`
+  padding: 10px;
   display: grid;
   gap: 6px;
+`;
+
+const Row = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+`;
+
+const Pill = styled.span<{ $tone: "good" | "warn" }>`
+  border-radius: ${({ theme }) => theme.radius.pill};
+  border: 1px solid
+    ${({ $tone }) => ($tone === "good" ? "rgba(157, 255, 204, 0.62)" : "rgba(255, 171, 171, 0.62)")};
+  background: ${({ $tone }) => ($tone === "good" ? "rgba(80, 195, 130, 0.18)" : "rgba(196, 69, 69, 0.22)")};
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 8px;
 `;
 
 const Footer = styled.div`
@@ -57,20 +71,4 @@ const Footer = styled.div`
   flex-wrap: wrap;
 `;
 
-const Button = styled.button`
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  color: ${({ theme }) => theme.colors.text};
-  padding: 11px 12px;
-  cursor: pointer;
-  min-width: 120px;
-  min-height: 44px;
-
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-`;
-
-export { Backdrop, Dialog, Field, Input, Result, Footer, Button };
+export { Backdrop, Dialog, Field, Input, ResultGrid, ResultItem, Row, Pill, Footer };

@@ -1,6 +1,7 @@
+import { GlassButton } from "@/components/ui/GlassButton";
 import { ACTION_LABELS } from "./constants";
 
-import { ActionButton, Wrap } from "./styles";
+import { Wrap } from "./styles";
 
 type ActionPanelProps = {
   actions: Array<"hit" | "stand" | "split" | "double">;
@@ -11,9 +12,9 @@ const ActionPanel = ({ actions, onAction }: ActionPanelProps) => {
   return (
     <Wrap>
       {actions.map((action) => (
-        <ActionButton key={action} onClick={() => onAction(action)}>
+        <GlassButton key={action} $variant="secondary" onClick={() => onAction(action)}>
           {ACTION_LABELS[action]}
-        </ActionButton>
+        </GlassButton>
       ))}
     </Wrap>
   );

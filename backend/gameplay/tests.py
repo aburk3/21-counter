@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections import Counter
+
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 
@@ -11,7 +13,14 @@ from gameplay.engine import (
     hand_total,
 )
 from gameplay.models import Round, RoundCountSubmission
-from gameplay.state import apply_action, get_state, save_state
+from gameplay.state import (
+    _ensure_shoe,
+    apply_action,
+    get_state,
+    init_state,
+    save_state,
+)
+from gameplay.strategy_feedback import summarize_strategy_decisions
 
 User = get_user_model()
 
@@ -22,6 +31,18 @@ class EngineTests(APITestCase):
         self.assertEqual(count_value("9D"), 0)
         self.assertEqual(count_value("AH"), -1)
         self.assertEqual(build_shoe(1, 42), build_shoe(1, 42))
+
+    def test_build_shoe_has_correct_card_multiplicity(self):
+        decks = 6
+        shoe = build_shoe(decks, 7)
+        counts = Counter(shoe)
+        self.assertEqual(len(shoe), 52 * decks)
+        self.assertEqual(len(counts), 52)
+        self.assertTrue(all(value == decks for value in counts.values()))
+
+    def test_full_shoe_hilo_count_sums_to_zero(self):
+        self.assertEqual(sum(count_value(card) for card in build_shoe(1, 11)), 0)
+        self.assertEqual(sum(count_value(card) for card in build_shoe(6, 11)), 0)
 
     def test_hand_total_and_strategy(self):
         self.assertEqual(hand_total(["AS", "9D"]), 20)
@@ -78,6 +99,37 @@ class EngineTests(APITestCase):
         apply_action(split_state, "double")
         self.assertFalse(split_state["active_round"]["resolved"])
         self.assertEqual(split_state["active_round"]["active_hand_index"], 1)
+
+
+class StrategyFeedbackTests(APITestCase):
+    def test_empty_decisions_are_not_marked_correct(self):
+        is_correct, played, expected = summarize_strategy_decisions([])
+        self.assertFalse(is_correct)
+        self.assertEqual(played, "")
+        self.assertEqual(expected, "")
+
+    def test_all_correct_decisions_return_first_pair(self):
+        is_correct, played, expected = summarize_strategy_decisions(
+            [
+                {"action": "hit", "recommended": "hit", "correct": True},
+                {"action": "stand", "recommended": "stand", "correct": True},
+            ]
+        )
+        self.assertTrue(is_correct)
+        self.assertEqual(played, "hit")
+        self.assertEqual(expected, "hit")
+
+    def test_mixed_decisions_return_first_incorrect_pair(self):
+        is_correct, played, expected = summarize_strategy_decisions(
+            [
+                {"action": "hit", "recommended": "hit", "correct": True},
+                {"action": "double", "recommended": "stand", "correct": False},
+                {"action": "stand", "recommended": "stand", "correct": True},
+            ]
+        )
+        self.assertFalse(is_correct)
+        self.assertEqual(played, "double")
+        self.assertEqual(expected, "stand")
 
 
 class SessionFlowTests(APITestCase):
@@ -281,3 +333,18 @@ class SessionFlowTests(APITestCase):
         resolved_round = resolved.data["state"]["active_round"]
         self.assertTrue(resolved_round["resolved"])
         self.assertEqual(resolved_round["phase"], "resolved")
+
+class ShoeTransitionTests(APITestCase):
+    def test_single_deck_with_multiple_shoes_does_not_skip_first_shoe(self):
+        state = init_state(session_id=3, decks=1, hands_dealt=1, shoes_per_session=2)
+        _ensure_shoe(state)
+        self.assertEqual(state["current_shoe"], 1)
+
+    def test_shuffle_to_next_shoe_resets_running_count(self):
+        state = init_state(session_id=5, decks=2, hands_dealt=1, shoes_per_session=2)
+        state["running_count"] = 9
+        state["shoe_cards"] = ["2S"] * 52
+        _ensure_shoe(state)
+        self.assertEqual(state["current_shoe"], 2)
+        self.assertEqual(state["running_count"], 0)
+        self.assertEqual(len(state["shoe_cards"]), 104)

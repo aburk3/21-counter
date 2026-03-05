@@ -47,9 +47,32 @@ describe("RoundSummaryDialog", () => {
     expect(
       screen.getByRole("button", { name: ROUND_SUMMARY_TEXT.SUBMIT_COUNT }),
     ).toBeDisabled();
-    expect(screen.getByText(ROUND_SUMMARY_TEXT.COUNT_INCORRECT)).toBeInTheDocument();
+    expect(screen.getAllByText(ROUND_SUMMARY_TEXT.COUNT_INCORRECT)).toHaveLength(2);
     expect(
       screen.getByText(ROUND_SUMMARY_TEXT.strategyIncorrect("hit", "stand")),
     ).toBeInTheDocument();
+  });
+
+  it("shows generic strategy hint for contradictory payloads", () => {
+    renderWithProviders(
+      <RoundSummaryDialog
+        feedback={{
+          is_correct: true,
+          actual_running_count: 0,
+          round_time_ms: 4000,
+          strategy_correct: false,
+          played_action: "hit",
+          correct_action: "hit",
+        }}
+        onSubmitCount={vi.fn()}
+        onNextRound={vi.fn()}
+        onExit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(ROUND_SUMMARY_TEXT.STRATEGY_REVIEW_HINT)).toBeInTheDocument();
+    expect(
+      screen.queryByText(ROUND_SUMMARY_TEXT.strategyIncorrect("hit", "hit")),
+    ).not.toBeInTheDocument();
   });
 });

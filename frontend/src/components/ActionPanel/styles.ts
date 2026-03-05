@@ -2,23 +2,23 @@ import styled from "styled-components";
 
 const Wrap = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-top: 2px;
-`;
 
-const ActionButton = styled.button`
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.18);
-  color: ${({ theme }) => theme.colors.text};
-  padding: 11px 16px;
-  min-height: 44px;
-  cursor: pointer;
+  button {
+    min-width: 98px;
+  }
+
+  button:not(:disabled):hover {
+    box-shadow: none;
+    transform: none;
+  }
 
   @media ${({ theme }) => theme.media.sm} {
-    flex: 1 1 calc(50% - 6px);
+    button {
+      flex: 1 1 calc(50% - 6px);
+    }
   }
 `;
 
-export { Wrap, ActionButton };
+export { Wrap };

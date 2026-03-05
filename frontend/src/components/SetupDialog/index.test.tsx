@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { SETUP_DIALOG_TEXT } from "@/components/SetupDialog/constants";
 import { renderWithProviders } from "@/test/test-utils";
 
@@ -17,7 +17,14 @@ describe("SetupDialog", () => {
       />,
     );
 
-    await user.selectOptions(screen.getByLabelText(SETUP_DIALOG_TEXT.DECKS_PER_SHOE), "8");
+    const decksLabel = screen.getByText(SETUP_DIALOG_TEXT.DECKS_PER_SHOE).closest("label");
+    if (!decksLabel) {
+      throw new Error("Decks field was not found");
+    }
+
+    const deckStepper = within(decksLabel);
+    await user.click(deckStepper.getByRole("button", { name: "+" }));
+    await user.click(deckStepper.getByRole("button", { name: "+" }));
     await user.click(screen.getByRole("button", { name: SETUP_DIALOG_TEXT.CONTINUE }));
 
     expect(onContinue).toHaveBeenCalledWith({

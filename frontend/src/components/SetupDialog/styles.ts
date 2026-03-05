@@ -1,43 +1,67 @@
 import styled from "styled-components";
 
+import { GlassSurface } from "@/components/ui/GlassSurface";
+
 const Backdrop = styled.div`
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.56);
   display: grid;
   place-items: center;
-`;
-
-const Dialog = styled.div`
-  width: min(480px, calc(100vw - 16px));
-  border: 1px solid ${({ theme }) => theme.colors.panelBorder};
-  border-radius: ${({ theme }) => theme.radius.panel};
-  background: ${({ theme }) => theme.colors.panel};
-  backdrop-filter: blur(12px);
-  padding: 20px;
+  z-index: 45;
 
   @media ${({ theme }) => theme.media.sm} {
-    padding: 14px;
+    place-items: end center;
+  }
+`;
+
+const Dialog = styled(GlassSurface)`
+  width: min(540px, calc(100vw - 16px));
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+
+  @media ${({ theme }) => theme.media.sm} {
+    width: 100%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 `;
 
 const Field = styled.label`
+  display: grid;
+  gap: 8px;
+`;
+
+const FieldLabel = styled.span`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+`;
+
+const StepperRow = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 12px;
+  align-items: center;
+  gap: 10px;
 `;
 
-const ContinueButton = styled.button`
-  margin-top: 16px;
-  width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  color: ${({ theme }) => theme.colors.text};
-  padding: 11px 12px;
+const Stepper = styled.div`
+  min-width: 52px;
   min-height: 44px;
-  cursor: pointer;
+  border-radius: ${({ theme }) => theme.radius.md};
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.1);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-family: "SF Mono", "Menlo", monospace;
 `;
 
-export { Backdrop, Dialog, Field, ContinueButton };
+const Footer = styled.div`
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
+
+export { Backdrop, Dialog, Field, FieldLabel, Stepper, StepperRow, Footer };

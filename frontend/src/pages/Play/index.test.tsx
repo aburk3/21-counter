@@ -6,7 +6,46 @@ import { SETUP_DIALOG_TEXT } from "@/components/SetupDialog/constants";
 import Play from "@/pages/Play";
 import { PLAY_PAGE_TEXT } from "@/pages/Play/constants";
 import { renderWithProviders } from "@/test/test-utils";
-const mockSession: any = {
+import type { PlayState } from "@/types/api";
+
+type MockSessionState = {
+  state: PlayState | null;
+  chips: number;
+  feedback: {
+    is_correct: boolean;
+    actual_running_count: number;
+    round_time_ms: number;
+    strategy_correct: boolean;
+    played_action: string;
+    correct_action: string;
+  } | null;
+  selectedSkin: string;
+  showCountDialog: boolean;
+  showResolvedOverlay: boolean;
+  isDealing: boolean;
+  sessionComplete: boolean;
+  sessionSummary: {
+    gainLoss: number;
+    countAccuracyPct: number;
+    playAccuracyPct: number;
+    totalRounds: number;
+  } | null;
+  gainLoss: number;
+  error: string | null;
+  timerMs: number;
+  totalUserBet: number;
+  createSession: ReturnType<typeof vi.fn>;
+  placeBet: ReturnType<typeof vi.fn>;
+  deal: ReturnType<typeof vi.fn>;
+  action: ReturnType<typeof vi.fn>;
+  submitCount: ReturnType<typeof vi.fn>;
+  nextRound: ReturnType<typeof vi.fn>;
+  exitSession: ReturnType<typeof vi.fn>;
+  setSelectedSkin: ReturnType<typeof vi.fn>;
+  setShowCountDialog: ReturnType<typeof vi.fn>;
+};
+
+const mockSession: MockSessionState = {
   state: null,
   chips: 500,
   feedback: null,

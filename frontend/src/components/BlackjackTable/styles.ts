@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 
 const SKIN_TONES: Record<string, string> = {
   classic_red: "rgba(120, 34, 36, 0.26)",
@@ -8,24 +8,36 @@ const SKIN_TONES: Record<string, string> = {
   gold: "rgba(143, 111, 34, 0.3)",
 };
 
+const focusPulse = keyframes`
+  from { box-shadow: 0 0 0 0 rgba(121, 232, 227, 0.26); }
+  to { box-shadow: 0 0 0 10px rgba(121, 232, 227, 0); }
+`;
+
 const TableWrap = styled.section<{ $skin: string }>`
   border: 1px solid ${({ theme }) => theme.colors.panelBorder};
-  border-radius: 24px;
+  border-radius: ${({ theme }) => theme.radius.lg};
   background:
     radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.14), transparent 45%),
     ${({ $skin }) => SKIN_TONES[$skin] ?? "rgba(7, 42, 30, 0.8)"},
     rgba(7, 42, 30, 0.8);
   padding: 20px;
-  min-height: 360px;
+  min-height: 420px;
   display: grid;
   gap: 14px;
 
   @media ${({ theme }) => theme.media.sm} {
     padding: 12px;
-    border-radius: 16px;
+    border-radius: ${({ theme }) => theme.radius.md};
     gap: 10px;
     min-height: 320px;
   }
+`;
+
+const Group = styled.section`
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(4, 20, 15, 0.22);
+  padding: 10px;
 `;
 
 const Header = styled.div`
@@ -34,6 +46,7 @@ const Header = styled.div`
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  font-family: "SF Mono", "Menlo", monospace;
 `;
 
 const HandRow = styled.div`
@@ -57,18 +70,31 @@ const Label = styled.div<{ $isPrimary?: boolean }>`
 const Seats = styled.div`
   display: grid;
   gap: 10px;
+  width: min(100%, 760px);
 `;
 
-const Seat = styled.div<{ $isPrimary?: boolean }>`
+const Seat = styled.div<{ $isPrimary?: boolean; $isActive: boolean }>`
   border: 1px solid
-    ${({ theme, $isPrimary }) =>
-      $isPrimary ? theme.colors.accent : "rgba(255, 255, 255, 0.25)"};
+    ${({ $isPrimary, $isActive }) =>
+      $isActive
+        ? "rgba(121, 232, 227, 0.86)"
+        : $isPrimary
+          ? "rgba(121, 232, 227, 0.42)"
+          : "rgba(255, 255, 255, 0.25)"};
   background: ${({ $isPrimary }) =>
     $isPrimary ? "rgba(110, 215, 255, 0.12)" : "rgba(255, 255, 255, 0.08)"};
   border-radius: 14px;
   padding: 10px;
   display: grid;
   gap: 8px;
+  opacity: ${({ $isPrimary, $isActive }) => ($isPrimary && !$isActive ? 0.78 : 1)};
+
+  ${({ $isActive }) =>
+    $isActive
+      ? css`
+          animation: ${focusPulse} 1.4s ease infinite;
+        `
+      : ""}
 
   @media ${({ theme }) => theme.media.sm} {
     padding: 8px;
@@ -117,18 +143,9 @@ const Cards = styled.div`
   flex-wrap: wrap;
 `;
 
-const BetSummary = styled.div`
-  display: grid;
-  gap: 4px;
-`;
-
-const BetItem = styled.div`
-  font-size: 14px;
-  color: ${({ theme }) => theme.colors.text};
-`;
-
 export {
   TableWrap,
+  Group,
   Header,
   HandRow,
   Label,
@@ -137,6 +154,4 @@ export {
   SeatHeader,
   StatusPill,
   Cards,
-  BetSummary,
-  BetItem,
 };

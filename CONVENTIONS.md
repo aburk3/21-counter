@@ -48,6 +48,7 @@ When conventions conflict, follow this priority order:
 - Pages should default export their page component.
 - Reusable components generally use named exports.
 - Keep helpers local to the file when they are not reused.
+- Exports should be at the bottom of the files and not exported inline.
 
 ## Styling Conventions
 

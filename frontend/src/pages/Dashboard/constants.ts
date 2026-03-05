@@ -1,28 +1,30 @@
 const DASHBOARD_TEXT = {
   TITLE: "Training Dashboard",
-  PLAY: "Play",
-  LOGOUT: "Logout",
+  PLAY: "Start Training",
+  RESUME: "Resume Last Setup",
   DASHBOARD_UNAVAILABLE: "Dashboard unavailable",
   LOADING_DASHBOARD: "Loading dashboard...",
+  HERO_SUBTITLE: "Master count discipline and decision speed.",
   STATS: {
-    CORRECT_COUNT_GAMES: "Correct Count Games",
+    CORRECT_COUNT_GAMES: "Correct Count Sessions",
     COUNT_ACCURACY: "Count Accuracy",
-    STRATEGY_CORRECT: "Strategy Correct",
-    AVG_TIME: "Avg Time",
+    STRATEGY_CORRECT: "Strategy Accuracy",
+    AVG_TIME: "Avg Decision Time",
     CURRENT_STREAK: "Current Streak",
     XP: "XP",
     CHIPS: "Chips",
+    TOTAL_SESSIONS: "Sessions",
   },
-  PROGRESSION_TITLE: "Progress",
+  PROGRESSION_TITLE: "Progression",
   progressionToNext: (xp: number, nextRank: string | null) =>
     nextRank ? `${xp} XP to ${nextRank}` : "Top rank reached",
   HOW_TO_RANK_UP:
-    "Rank up by submitting correct counts (+20), correct strategy (+10), and speed bonus (+5 under 10s).",
+    "Earn XP with correct counts (+20), strategy correctness (+10), and speed bonus (+5 under 10s).",
   UNLOCKS_TITLE: "Deck Unlocks",
   nextUnlock: (rank: string | null) =>
     rank ? `Next unlock at ${rank}` : "All deck skins unlocked",
   BANKROLL_TITLE: "Bankroll Refill",
-  BANKROLL_WARNING: "Refilling chips costs 75 XP and may lower your rank.",
+  BANKROLL_WARNING: "Refilling chips costs 75 XP and may reduce rank progress.",
   BANKROLL_BUTTON: "Add $500 Chips",
   REFILL_CONFIRM_TITLE: "Confirm Refill",
   refillConfirmDetails: (

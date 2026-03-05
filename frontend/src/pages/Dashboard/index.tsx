@@ -2,9 +2,9 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { RankBadge } from "@/components/RankBadge";
-import { StatTile } from "@/components/StatTile";
+import { StatCardV2 } from "@/components/StatCardV2";
+import { GlassButton } from "@/components/ui/GlassButton";
 import { useDashboard } from "@/hooks/useDashboard";
-import { clearTokens } from "@/lib/api";
 import {
   DASHBOARD_RANK_LABELS,
   DASHBOARD_SKIN_LABELS,
@@ -12,11 +12,15 @@ import {
 } from "./constants";
 
 import {
-  Actions,
-  Button,
   ErrorText,
   Grid,
+  Hero,
+  HeroActions,
+  HeroMeta,
+  HeroStats,
+  HeroTop,
   Message,
+  ModalActions,
   ModalBackdrop,
   ModalCard,
   Panel,
@@ -27,8 +31,8 @@ import {
   SkinLabel,
   SkinList,
   SkinPreviewCard,
-  TopBar,
   Wrap,
+  ZoneGrid,
 } from "./styles";
 
 const Dashboard = () => {
@@ -56,33 +60,24 @@ const Dashboard = () => {
 
   return (
     <Wrap>
-      <TopBar>
-        <h1>{DASHBOARD_TEXT.TITLE}</h1>
-        <RankBadge rank={data.current_rank} />
-      </TopBar>
+      <Hero $elevation={2}>
+        <HeroTop>
+          <HeroMeta>
+            <h1>{DASHBOARD_TEXT.TITLE}</h1>
+            <p>{DASHBOARD_TEXT.HERO_SUBTITLE}</p>
+            <RankBadge rank={data.current_rank} />
+          </HeroMeta>
+          <HeroActions>
+            <GlassButton $variant="primary" onClick={() => navigate("/play")}>
+              {DASHBOARD_TEXT.PLAY}
+            </GlassButton>
+            <GlassButton $variant="secondary" onClick={() => navigate("/play?resume=1")}>
+              {DASHBOARD_TEXT.RESUME}
+            </GlassButton>
+          </HeroActions>
+        </HeroTop>
 
-      <Grid>
-        <StatTile
-          label={DASHBOARD_TEXT.STATS.CORRECT_COUNT_GAMES}
-          value={data.correct_count_games}
-        />
-        <StatTile label={DASHBOARD_TEXT.STATS.COUNT_ACCURACY} value={`${data.accuracy_pct}%`} />
-        <StatTile
-          label={DASHBOARD_TEXT.STATS.STRATEGY_CORRECT}
-          value={`${data.strategy_correct_pct}%`}
-        />
-        <StatTile
-          label={DASHBOARD_TEXT.STATS.AVG_TIME}
-          value={`${(data.avg_decision_ms / 1000).toFixed(2)}s`}
-        />
-        <StatTile label={DASHBOARD_TEXT.STATS.CURRENT_STREAK} value={data.current_streak} />
-        <StatTile label={DASHBOARD_TEXT.STATS.XP} value={data.xp} />
-        <StatTile label={DASHBOARD_TEXT.STATS.CHIPS} value={`$${data.chips}`} />
-      </Grid>
-
-      <Grid>
-        <Panel>
-          <h3>{DASHBOARD_TEXT.PROGRESSION_TITLE}</h3>
+        <div>
           <div>{`${DASHBOARD_TEXT.STATS.XP}: ${data.xp}`}</div>
           <ProgressBar>
             <ProgressFill $pct={data.rank_progress_pct} />
@@ -95,31 +90,78 @@ const Dashboard = () => {
                 : null,
             )}
           </div>
-          <p>{DASHBOARD_TEXT.HOW_TO_RANK_UP}</p>
-        </Panel>
+        </div>
 
+        <HeroStats>
+          <StatCardV2
+            label={DASHBOARD_TEXT.STATS.CURRENT_STREAK}
+            value={data.current_streak}
+            trend={data.current_streak >= 3 ? "up" : "neutral"}
+          />
+          <StatCardV2
+            label={DASHBOARD_TEXT.STATS.CHIPS}
+            value={`$${data.chips}`}
+            trend={data.chips >= 500 ? "up" : "down"}
+          />
+          <StatCardV2
+            label={DASHBOARD_TEXT.STATS.COUNT_ACCURACY}
+            value={`${data.accuracy_pct}%`}
+            trend={data.accuracy_pct >= 70 ? "up" : "down"}
+          />
+        </HeroStats>
+      </Hero>
+
+      <Grid>
+        <StatCardV2
+          label={DASHBOARD_TEXT.STATS.CORRECT_COUNT_GAMES}
+          value={data.correct_count_games}
+          trend={data.correct_count_games >= 5 ? "up" : "neutral"}
+        />
+        <StatCardV2
+          label={DASHBOARD_TEXT.STATS.STRATEGY_CORRECT}
+          value={`${data.strategy_correct_pct}%`}
+          trend={data.strategy_correct_pct >= 70 ? "up" : "down"}
+        />
+        <StatCardV2
+          label={DASHBOARD_TEXT.STATS.AVG_TIME}
+          value={`${(data.avg_decision_ms / 1000).toFixed(2)}s`}
+          trend={data.avg_decision_ms <= 10000 ? "up" : "down"}
+        />
+        <StatCardV2
+          label={DASHBOARD_TEXT.STATS.TOTAL_SESSIONS}
+          value={data.total_games}
+          trend="neutral"
+        />
+      </Grid>
+
+      <ZoneGrid>
         <Panel>
           <h3>{DASHBOARD_TEXT.UNLOCKS_TITLE}</h3>
           <SkinList>
-            {Object.entries(DASHBOARD_SKIN_LABELS).map(([key, label]) => (
-              <SkinItem
-                key={key}
-                $locked={!data.available_skins.includes(key)}
-                disabled={!data.available_skins.includes(key)}
-                onClick={() => {
-                  if (data.available_skins.includes(key)) {
-                    void selectSkin(key);
-                  }
-                }}
-              >
-                <SkinItemBody>
-                  <SkinPreviewCard $skin={key}>A♥</SkinPreviewCard>
-                  <SkinLabel>
-                    {`${label}${data.selected_skin === key ? ` (${DASHBOARD_TEXT.SELECTED})` : ""}`}
-                  </SkinLabel>
-                </SkinItemBody>
-              </SkinItem>
-            ))}
+            {Object.entries(DASHBOARD_SKIN_LABELS).map(([key, label]) => {
+              const unlocked = data.available_skins.includes(key);
+              const selected = data.selected_skin === key;
+              return (
+                <SkinItem
+                  key={key}
+                  $locked={!unlocked}
+                  $selected={selected}
+                  disabled={!unlocked}
+                  onClick={() => {
+                    if (unlocked) {
+                      void selectSkin(key);
+                    }
+                  }}
+                >
+                  <SkinItemBody>
+                    <SkinPreviewCard $skin={key}>A♥</SkinPreviewCard>
+                    <SkinLabel>
+                      {`${label}${selected ? ` (${DASHBOARD_TEXT.SELECTED})` : ""}`}
+                    </SkinLabel>
+                  </SkinItemBody>
+                </SkinItem>
+              );
+            })}
           </SkinList>
           <p>
             {DASHBOARD_TEXT.nextUnlock(
@@ -133,27 +175,17 @@ const Dashboard = () => {
         <Panel>
           <h3>{DASHBOARD_TEXT.BANKROLL_TITLE}</h3>
           <p>{DASHBOARD_TEXT.BANKROLL_WARNING}</p>
-          <Button onClick={() => setRefillOpen(true)}>{DASHBOARD_TEXT.BANKROLL_BUTTON}</Button>
+          <GlassButton $variant="destructive" onClick={() => setRefillOpen(true)}>
+            {DASHBOARD_TEXT.BANKROLL_BUTTON}
+          </GlassButton>
           {message ? <Message>{message}</Message> : null}
         </Panel>
-      </Grid>
-
-      <Actions>
-        <Button onClick={() => navigate("/play")}>{DASHBOARD_TEXT.PLAY}</Button>
-        <Button
-          onClick={() => {
-            clearTokens();
-            navigate("/auth");
-          }}
-        >
-          {DASHBOARD_TEXT.LOGOUT}
-        </Button>
-      </Actions>
+      </ZoneGrid>
 
       {error ? <ErrorText>{error}</ErrorText> : null}
       {refillOpen && projected ? (
         <ModalBackdrop>
-          <ModalCard>
+          <ModalCard $elevation={3}>
             <h3>{DASHBOARD_TEXT.REFILL_CONFIRM_TITLE}</h3>
             <p>
               {DASHBOARD_TEXT.refillConfirmDetails(
@@ -163,18 +195,19 @@ const Dashboard = () => {
                 DASHBOARD_RANK_LABELS[projected.nextRank] ?? projected.nextRank,
               )}
             </p>
-            <Actions>
-              <Button
+            <ModalActions>
+              <GlassButton
+                $variant="destructive"
                 onClick={() => {
                   void refillChips().finally(() => setRefillOpen(false));
                 }}
               >
                 {DASHBOARD_TEXT.REFILL_CONFIRM}
-              </Button>
-              <Button onClick={() => setRefillOpen(false)}>
+              </GlassButton>
+              <GlassButton $variant="secondary" onClick={() => setRefillOpen(false)}>
                 {DASHBOARD_TEXT.REFILL_CANCEL}
-              </Button>
-            </Actions>
+              </GlassButton>
+            </ModalActions>
           </ModalCard>
         </ModalBackdrop>
       ) : null}

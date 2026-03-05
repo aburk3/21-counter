@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
+import { AppShell } from "@/components/AppShell";
 import { hasToken } from "@/lib/api";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
@@ -21,7 +22,9 @@ const App = () => {
         path="/dashboard"
         element={
           <PrivateRoute>
-            <Dashboard />
+            <AppShell title="Training Dashboard" context="Dashboard">
+              <Dashboard />
+            </AppShell>
           </PrivateRoute>
         }
       />
@@ -29,7 +32,9 @@ const App = () => {
         path="/play"
         element={
           <PrivateRoute>
-            <Play />
+            <AppShell title="Card Counting Training" context="Training Session">
+              <Play />
+            </AppShell>
           </PrivateRoute>
         }
       />

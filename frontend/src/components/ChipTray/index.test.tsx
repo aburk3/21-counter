@@ -5,19 +5,24 @@ import { renderWithProviders } from "@/test/test-utils";
 import { ChipTray } from "@/components/ChipTray";
 
 describe("ChipTray", () => {
-  it("calls onBet with selected chip amount", async () => {
+  it("calls onChangeBet with increased amount", async () => {
     const user = userEvent.setup();
-    const onBet = vi.fn();
-    renderWithProviders(<ChipTray onBet={onBet} chips={500} />);
+    const onChangeBet = vi.fn();
+    renderWithProviders(
+      <ChipTray onChangeBet={onChangeBet} currentBet={25} maxBet={500} />,
+    );
 
-    await user.click(screen.getByRole("button", { name: "$25" }));
-    expect(onBet).toHaveBeenCalledWith(25);
+    await user.click(screen.getByRole("button", { name: "Increase bet by $25" }));
+    expect(onChangeBet).toHaveBeenCalledWith(50);
   });
 
-  it("disables chips above available balance", () => {
-    renderWithProviders(<ChipTray onBet={vi.fn()} chips={475} />);
+  it("disables invalid increases and decreases", () => {
+    renderWithProviders(
+      <ChipTray onChangeBet={vi.fn()} currentBet={25} maxBet={475} />,
+    );
 
-    expect(screen.getByRole("button", { name: "$500" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "$100" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Increase bet by $500" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Increase bet by $100" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Decrease bet by $25" })).toBeDisabled();
   });
 });

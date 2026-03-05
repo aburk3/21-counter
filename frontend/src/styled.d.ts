@@ -16,8 +16,41 @@ declare module "styled-components" {
       chipRed: string;
       chipGreen: string;
       chipBlack: string;
+      textPrimary: string;
+      textSecondary: string;
+      actionPrimary: string;
+      actionSecondary: string;
+      actionDestructive: string;
+    };
+    surface: {
+      glass: string;
+      glassStrong: string;
+    };
+    stroke: {
+      glass: string;
+    };
+    blur: {
+      1: string;
+      2: string;
+      3: string;
+    };
+    shadow: {
+      1: string;
+      2: string;
+      3: string;
+    };
+    spacing: {
+      xs: string;
+      sm: string;
+      md: string;
+      lg: string;
+      xl: string;
+      xxl: string;
     };
     radius: {
+      sm: string;
+      md: string;
+      lg: string;
       panel: string;
       pill: string;
     };

@@ -1,118 +1,100 @@
 import styled from "styled-components";
 
-const Wrap = styled.main`
-  padding: 20px;
+import { GlassSurface } from "@/components/ui/GlassSurface";
 
-  @media ${({ theme }) => theme.media.sm} {
-    padding: 12px;
-  }
+const Wrap = styled.main`
+  display: grid;
+  gap: 12px;
 `;
 
-const TopBar = styled.div`
+const UtilityBar = styled(GlassSurface)`
+  padding: 10px 12px;
+  transform: translateZ(0);
+  contain: paint;
+  isolation: isolate;
+  overflow: hidden;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 `;
 
-const TopActions = styled.div`
+const UtilityMeta = styled.div`
+  display: grid;
+  gap: 4px;
+
+  span {
+    color: ${({ theme }) => theme.colors.textSecondary};
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+`;
+
+const UtilityActions = styled.div`
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
 `;
 
 const Layout = styled.section`
-  margin-top: 12px;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
+  gap: 12px;
+  align-items: start;
 
   @media ${({ theme }) => theme.media.tabletUp} {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1.9fr 1fr;
   }
 `;
 
-const SidePanel = styled.aside`
-  border: 1px solid ${({ theme }) => theme.colors.panelBorder};
-  border-radius: ${({ theme }) => theme.radius.panel};
-  background: ${({ theme }) => theme.colors.panel};
-  backdrop-filter: blur(12px);
-  padding: 18px;
+const TableRegion = styled.div`
+  min-width: 0;
+`;
+
+const Dock = styled(GlassSurface)`
+  padding: 14px;
   display: grid;
-  gap: 16px;
+  gap: 12px;
   align-content: start;
 
   @media ${({ theme }) => theme.media.sm} {
-    padding: 14px;
-    gap: 14px;
+    position: sticky;
+    bottom: 8px;
+    z-index: 18;
   }
 `;
 
-const Section = styled.div`
+const DockSection = styled.section`
   display: grid;
-  gap: 10px;
+  gap: 8px;
+`;
+
+const DockRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+`;
+
+const DockLabel = styled.span`
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
+const HintCard = styled(GlassSurface)`
+  padding: 10px;
+  font-size: 13px;
 `;
 
 const Caption = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.textSubtle};
   font-size: 13px;
-`;
-
-const ActionRow = styled.div`
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-`;
-
-const ExitButton = styled.button`
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  color: ${({ theme }) => theme.colors.text};
-  padding: 11px 13px;
-  min-height: 44px;
-  cursor: pointer;
-`;
-
-const SettingsButton = styled.button`
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  color: ${({ theme }) => theme.colors.text};
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  transition: transform 180ms ease, background 180ms ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.28);
-  }
-`;
-
-const ContinueCountButton = styled.button`
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  color: ${({ theme }) => theme.colors.text};
-  padding: 11px 13px;
-  min-height: 44px;
-  cursor: pointer;
-  transition: transform 180ms ease, background 180ms ease;
-
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
-
-  &:not(:disabled):hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.28);
-  }
 `;
 
 const ErrorText = styled.p`
@@ -129,20 +111,11 @@ const SummaryBackdrop = styled.div`
   z-index: 30;
 `;
 
-const SummaryCard = styled.section`
-  width: min(560px, calc(100vw - 16px));
-  border: 1px solid ${({ theme }) => theme.colors.panelBorder};
-  border-radius: ${({ theme }) => theme.radius.panel};
-  background: ${({ theme }) => theme.colors.panel};
-  backdrop-filter: blur(12px);
+const SummaryCard = styled(GlassSurface)`
+  width: min(620px, calc(100vw - 16px));
   padding: 22px;
   display: grid;
   gap: 14px;
-
-  @media ${({ theme }) => theme.media.sm} {
-    padding: 16px;
-    gap: 10px;
-  }
 `;
 
 const SummaryGrid = styled.div`
@@ -150,28 +123,33 @@ const SummaryGrid = styled.div`
   gap: 8px;
 `;
 
-const SummaryItem = styled.div`
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
+const SummaryItem = styled(GlassSurface)`
   padding: 10px 12px;
+`;
+
+const ActionRow = styled.div`
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 `;
 
 export {
   Wrap,
-  TopBar,
-  TopActions,
+  UtilityBar,
+  UtilityMeta,
+  UtilityActions,
   Layout,
-  SidePanel,
-  Section,
+  TableRegion,
+  Dock,
+  DockSection,
+  DockRow,
+  DockLabel,
+  HintCard,
   Caption,
-  ActionRow,
-  ExitButton,
-  SettingsButton,
-  ContinueCountButton,
   ErrorText,
   SummaryBackdrop,
   SummaryCard,
   SummaryGrid,
   SummaryItem,
+  ActionRow,
 };

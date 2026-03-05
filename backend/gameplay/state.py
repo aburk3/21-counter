@@ -82,8 +82,13 @@ def _draw(state: dict[str, Any]) -> str:
     return card
 
 
+def shuffle_remaining_cards(decks_per_shoe: int) -> int:
+    """Cards remaining at which a shuffle should occur before the next round."""
+    return 52 if decks_per_shoe > 1 else 0
+
+
 def _ensure_shoe(state: dict[str, Any]) -> None:
-    if len(state["shoe_cards"]) > 52:
+    if len(state["shoe_cards"]) > shuffle_remaining_cards(state["decks_per_shoe"]):
         return
     if state["current_shoe"] >= state["shoes_per_session"]:
         return
@@ -91,6 +96,7 @@ def _ensure_shoe(state: dict[str, Any]) -> None:
     state["shoe_cards"] = build_shoe(
         state["decks_per_shoe"], state["seed"] + state["current_shoe"]
     )
+    state["running_count"] = 0
 
 
 def _status_for_cards(cards: list[str], stood: bool = False) -> str:
