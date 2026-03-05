@@ -116,6 +116,96 @@ npm run lint
 npm run build
 ```
 
+## Deployment (Low Cost)
+
+Recommended setup:
+- Frontend: Vercel (Hobby)
+- Backend API: Railway (service)
+- Database: Railway Postgres
+
+### 1) Accounts to create
+
+- GitHub account (if your repo is not already on GitHub)
+- Railway account: https://railway.com
+- Vercel account: https://vercel.com
+- Optional (if using Google login): Google Cloud project + OAuth credentials
+
+### 2) Code/dependency prerequisites
+
+- Backend now includes `gunicorn` in `backend/requirements.txt` for production WSGI serving.
+- Frontend includes `frontend/vercel.json` rewrite config for React Router deep links.
+
+### 3) Deploy backend on Railway
+
+1. Push this repo to GitHub.
+2. In Railway, create a new project from your GitHub repo.
+3. Add a PostgreSQL service in the same Railway project.
+4. Add a service for this repo with:
+   - Root directory: `backend`
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT`
+5. In Railway service variables, set values from `backend/env.production.example`:
+   - `DJANGO_SECRET_KEY`
+   - `DJANGO_DEBUG=0`
+   - `DJANGO_ALLOWED_HOSTS` (your Railway backend hostname)
+   - `CORS_ALLOWED_ORIGINS` (your Vercel frontend URL)
+   - Database:
+     - Preferred: keep Railway-native vars (`PGDATABASE`, `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`)
+     - Or set manual mapping (`POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`)
+     - Or set `DATABASE_URL`
+   - `DEFAULT_FROM_EMAIL`
+   - `FRONTEND_EMAIL_VERIFY_URL`
+   - `FRONTEND_GOOGLE_COMPLETE_URL`
+   - Optional OAuth: `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`
+6. Run migrations in Railway once after first deploy:
+   - `python manage.py migrate`
+
+### 4) Deploy frontend on Vercel
+
+1. In Vercel, import the same GitHub repo.
+2. Configure:
+   - Framework preset: Vite
+   - Root directory: `frontend`
+3. Add environment variable (from `frontend/env.production.example`):
+   - `VITE_API_URL=https://<your-backend-domain>/api`
+4. Deploy.
+
+### 5) Final wiring checklist
+
+1. Confirm backend has:
+   - `DJANGO_ALLOWED_HOSTS=<backend-domain>`
+   - `CORS_ALLOWED_ORIGINS=<frontend-domain>`
+2. Confirm frontend has:
+   - `VITE_API_URL=https://<backend-domain>/api`
+3. Redeploy both services after any env var change.
+
+### 6) Secrets you must set (do not commit)
+
+Required:
+- `DJANGO_SECRET_KEY`
+- one valid Postgres configuration:
+  - Railway native `PG*` vars, or
+  - `POSTGRES_*` mapped vars, or
+  - `DATABASE_URL`
+
+Optional depending on features:
+- `GOOGLE_OAUTH_CLIENT_ID`
+- `GOOGLE_OAUTH_CLIENT_SECRET`
+- SMTP secrets if using real email delivery:
+  - `EMAIL_HOST`
+  - `EMAIL_PORT`
+  - `EMAIL_HOST_USER`
+  - `EMAIL_HOST_PASSWORD`
+  - `EMAIL_USE_TLS`
+
+### 7) Production smoke test
+
+1. Register a user.
+2. Login and load dashboard.
+3. Start session, place bet, deal cards, play a hand, submit count.
+4. Verify no CORS errors in browser devtools.
+5. Refresh deep route (for example `/play`) and confirm frontend still loads.
+
 ## Gameplay Notes
 
 - Setup dialog saves default decks/hands/shoes per user.

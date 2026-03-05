@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,6 +26,30 @@ def _load_dotenv(path: Path) -> None:
 def _csv_env(name: str, default: str) -> list[str]:
     raw = os.getenv(name, default)
     return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+def _env_first(*names: str, default: str | None = None) -> str | None:
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return default
+
+
+def _postgres_from_url(url: str) -> dict[str, str]:
+    parsed = urlparse(url)
+    if parsed.scheme not in {"postgres", "postgresql"}:
+        raise RuntimeError("DATABASE_URL must use postgres/postgresql scheme")
+    if not parsed.path or parsed.path == "/":
+        raise RuntimeError("DATABASE_URL must include a database name")
+    return {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": parsed.path.lstrip("/"),
+        "USER": parsed.username or "postgres",
+        "PASSWORD": parsed.password or "postgres",
+        "HOST": parsed.hostname or "localhost",
+        "PORT": str(parsed.port or "5432"),
+    }
 
 
 _load_dotenv(BASE_DIR / ".env")
@@ -86,17 +111,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-if os.getenv("POSTGRES_DB"):
+postgres_db_name = _env_first("POSTGRES_DB", "PGDATABASE")
+database_url = os.getenv("DATABASE_URL")
+
+if postgres_db_name:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("POSTGRES_DB"),
-            "USER": os.getenv("POSTGRES_USER", "postgres"),
-            "PASSWORD": os.getenv("POSTGRES_PASSWORD", "postgres"),
-            "HOST": os.getenv("POSTGRES_HOST", "localhost"),
-            "PORT": os.getenv("POSTGRES_PORT", "5432"),
+            "NAME": postgres_db_name,
+            "USER": _env_first("POSTGRES_USER", "PGUSER", default="postgres"),
+            "PASSWORD": _env_first(
+                "POSTGRES_PASSWORD", "PGPASSWORD", default="postgres"
+            ),
+            "HOST": _env_first("POSTGRES_HOST", "PGHOST", default="localhost"),
+            "PORT": _env_first("POSTGRES_PORT", "PGPORT", default="5432"),
         }
     }
+elif database_url:
+    DATABASES = {"default": _postgres_from_url(database_url)}
 else:
     DATABASES = {
         "default": {
