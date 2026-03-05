@@ -1,4 +1,26 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const DEFAULT_DEV_API_URL = "http://localhost:8000/api";
+
+type EnvConfig = {
+  DEV: boolean;
+  VITE_API_URL?: string;
+  VITE_API_URL_DEV?: string;
+};
+
+const resolveApiUrl = (env: EnvConfig): string => {
+  const value = env.DEV
+    ? (env.VITE_API_URL_DEV ?? env.VITE_API_URL ?? DEFAULT_DEV_API_URL)
+    : env.VITE_API_URL;
+  if (!value) {
+    throw new Error("VITE_API_URL must be set for production builds.");
+  }
+  return value.replace(/\/+$/, "");
+};
+
+const API_URL = resolveApiUrl({
+  DEV: import.meta.env.DEV,
+  VITE_API_URL: import.meta.env.VITE_API_URL,
+  VITE_API_URL_DEV: import.meta.env.VITE_API_URL_DEV,
+});
 const ACCESS_KEY = "counter.access";
 const REFRESH_KEY = "counter.refresh";
 
@@ -58,4 +80,4 @@ const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
 
 const hasToken = () => Boolean(getAccessToken());
 
-export { request, setTokens, clearTokens, refreshToken, hasToken };
+export { request, setTokens, clearTokens, refreshToken, hasToken, resolveApiUrl };
