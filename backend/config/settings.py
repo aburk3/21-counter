@@ -114,7 +114,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 postgres_db_name = _env_first("POSTGRES_DB", "PGDATABASE")
 database_url = os.getenv("DATABASE_URL")
 
-if postgres_db_name:
+if database_url:
+    DATABASES = {"default": _postgres_from_url(database_url)}
+elif postgres_db_name:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -127,8 +129,6 @@ if postgres_db_name:
             "PORT": _env_first("POSTGRES_PORT", "PGPORT", default="5432"),
         }
     }
-elif database_url:
-    DATABASES = {"default": _postgres_from_url(database_url)}
 else:
     DATABASES = {
         "default": {
