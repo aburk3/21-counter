@@ -17,7 +17,7 @@ import {
   nextRound,
   submitCount,
 } from "./gameplay";
-import { dashboard } from "./progress";
+import { dashboard, startPracticeRun, submitPracticeRun } from "./progress";
 import { me, refillChips, updateSettings } from "./user";
 
 const api = {
@@ -31,6 +31,8 @@ const api = {
   updateSettings,
   refillChips,
   dashboard,
+  startPracticeRun,
+  submitPracticeRun,
   createSession,
   getSession,
   bet,

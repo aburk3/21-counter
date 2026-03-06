@@ -2,6 +2,7 @@ const DASHBOARD_TEXT = {
   TITLE: "Training Dashboard",
   PLAY: "Start Training",
   RESUME: "Resume Last Setup",
+  PRACTICE: "Count Practice Lab",
   DASHBOARD_UNAVAILABLE: "Dashboard unavailable",
   LOADING_DASHBOARD: "Loading dashboard...",
   HERO_SUBTITLE: "Master count discipline and decision speed.",
@@ -14,6 +15,9 @@ const DASHBOARD_TEXT = {
     XP: "XP",
     CHIPS: "Chips",
     TOTAL_SESSIONS: "Sessions",
+    PRACTICE_ACCURACY: "Practice Accuracy",
+    PRACTICE_AVG: "Practice Avg / Deck",
+    PRACTICE_STREAK: "Practice Best Streak",
   },
   PROGRESSION_TITLE: "Progression",
   progressionToNext: (xp: number, nextRank: string | null) =>
@@ -38,6 +42,15 @@ const DASHBOARD_TEXT = {
   refillSuccess: (delta: number, xpDelta: number) =>
     `Added $${delta} chips, ${Math.abs(xpDelta)} XP deducted.`,
   SELECTED: "selected",
+  PRACTICE_TITLE: "Practice Progress",
+  PRACTICE_RECENT: "Recent Runs",
+  practiceMode: (mode: string) => (mode === "auto" ? "Auto" : "Manual"),
+  practiceSpeed: (speed: string) =>
+    speed === "expert" ? "Expert" : speed === "intermediate" ? "Intermediate" : "Beginner",
+  practiceRunLabel: (mode: string, speed: string, decks: number) =>
+    `${decks}D ${mode === "auto" ? "Auto" : "Manual"} ${speed === "expert" ? "Expert" : speed === "intermediate" ? "Intermediate" : "Beginner"}`,
+  practiceRunResult: (isCorrect: boolean, xpDelta: number) =>
+    `${isCorrect ? "Correct" : "Incorrect"} • XP +${xpDelta}`,
 } as const;
 
 const DASHBOARD_RANK_LABELS: Record<string, string> = {

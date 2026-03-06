@@ -13,7 +13,28 @@ const resolveApiUrl = (env: EnvConfig): string => {
   if (!value) {
     throw new Error("VITE_API_URL must be set for production builds.");
   }
-  return value.replace(/\/+$/, "");
+  const trimmed = value.replace(/\/+$/, "");
+
+  if (!env.DEV) {
+    let parsed: URL;
+    try {
+      parsed = new URL(trimmed);
+    } catch {
+      throw new Error(
+        "VITE_API_URL must be an absolute URL in production, for example https://api.example.com/api",
+      );
+    }
+    if (!/^https?:$/.test(parsed.protocol)) {
+      throw new Error("VITE_API_URL must use http or https protocol.");
+    }
+    if (!parsed.pathname.endsWith("/api")) {
+      throw new Error(
+        "VITE_API_URL must include the /api path, for example https://api.example.com/api",
+      );
+    }
+  }
+
+  return trimmed;
 };
 
 const API_URL = resolveApiUrl({

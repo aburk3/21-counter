@@ -24,6 +24,9 @@ import {
   ModalBackdrop,
   ModalCard,
   Panel,
+  PracticeList,
+  PracticeMeta,
+  PracticeRow,
   ProgressBar,
   ProgressFill,
   SkinItem,
@@ -73,6 +76,9 @@ const Dashboard = () => {
             </GlassButton>
             <GlassButton $variant="secondary" onClick={() => navigate("/play?resume=1")}>
               {DASHBOARD_TEXT.RESUME}
+            </GlassButton>
+            <GlassButton $variant="ghost" onClick={() => navigate("/practice")}>
+              {DASHBOARD_TEXT.PRACTICE}
             </GlassButton>
           </HeroActions>
         </HeroTop>
@@ -132,6 +138,21 @@ const Dashboard = () => {
           value={data.total_games}
           trend="neutral"
         />
+        <StatCardV2
+          label={DASHBOARD_TEXT.STATS.PRACTICE_ACCURACY}
+          value={`${data.practice_accuracy_pct}%`}
+          trend={data.practice_accuracy_pct >= 70 ? "up" : "down"}
+        />
+        <StatCardV2
+          label={DASHBOARD_TEXT.STATS.PRACTICE_AVG}
+          value={`${(data.practice_avg_ms_per_deck / 1000).toFixed(2)}s`}
+          trend={data.practice_avg_ms_per_deck <= 45000 ? "up" : "neutral"}
+        />
+        <StatCardV2
+          label={DASHBOARD_TEXT.STATS.PRACTICE_STREAK}
+          value={data.practice_best_streak}
+          trend={data.practice_best_streak >= 3 ? "up" : "neutral"}
+        />
       </Grid>
 
       <ZoneGrid>
@@ -170,6 +191,29 @@ const Dashboard = () => {
                 : null,
             )}
           </p>
+        </Panel>
+
+        <Panel>
+          <h3>{DASHBOARD_TEXT.PRACTICE_TITLE}</h3>
+          <p>
+            {`Runs ${data.practice_total_runs} • Correct ${data.practice_correct_runs} • Accuracy ${data.practice_accuracy_pct}%`}
+          </p>
+          <h4>{DASHBOARD_TEXT.PRACTICE_RECENT}</h4>
+          <PracticeList>
+            {data.practice_recent_runs.length ? (
+              data.practice_recent_runs.map((run) => (
+                <PracticeRow key={run.id} $elevation={1}>
+                  <strong>{DASHBOARD_TEXT.practiceRunLabel(run.mode, run.speed_tier, run.decks)}</strong>
+                  <PracticeMeta>
+                    <span>{`${(run.duration_ms / 1000).toFixed(2)}s`}</span>
+                    <span>{DASHBOARD_TEXT.practiceRunResult(run.is_correct, run.xp_delta)}</span>
+                  </PracticeMeta>
+                </PracticeRow>
+              ))
+            ) : (
+              <p>No practice runs yet.</p>
+            )}
+          </PracticeList>
         </Panel>
 
         <Panel>

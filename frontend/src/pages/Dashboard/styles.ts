@@ -161,6 +161,26 @@ const SkinPreviewCard = styled.div<{ $skin: string }>`
   place-items: center;
 `;
 
+const PracticeList = styled.div`
+  display: grid;
+  gap: 8px;
+`;
+
+const PracticeRow = styled(GlassSurface)`
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+`;
+
+const PracticeMeta = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: 12px;
+`;
+
 const Message = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.success};
@@ -210,6 +230,9 @@ export {
   SkinItemBody,
   SkinLabel,
   SkinPreviewCard,
+  PracticeList,
+  PracticeRow,
+  PracticeMeta,
   Message,
   ErrorText,
   ModalBackdrop,

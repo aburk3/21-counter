@@ -53,6 +53,54 @@ type DashboardResponse = {
   rank_progress_pct: number;
   available_skins: string[];
   selected_skin: string;
+  practice_total_runs: number;
+  practice_correct_runs: number;
+  practice_accuracy_pct: number;
+  practice_avg_ms_per_deck: number;
+  practice_best_streak: number;
+  practice_recent_runs: PracticeRecentRun[];
+};
+
+type PracticeMode = "auto" | "manual";
+type PracticeSpeedTier = "beginner" | "intermediate" | "expert";
+
+type PracticeRecentRun = {
+  id: number;
+  created_at: string;
+  decks: number;
+  mode: PracticeMode;
+  speed_tier: PracticeSpeedTier;
+  duration_ms: number;
+  is_correct: boolean;
+  count_delta: number | null;
+  xp_delta: number;
+};
+
+type PracticeRunStartResponse = {
+  run_id: number;
+  decks: number;
+  mode: PracticeMode;
+  speed_tier: PracticeSpeedTier;
+  target_duration_ms: number;
+  hidden_cards_count: number;
+  visible_cards_count: number;
+  visible_cards: string[];
+  started_at: string;
+};
+
+type PracticeRunSubmitResponse = {
+  run_id: number;
+  is_correct: boolean;
+  actual_running_count: number;
+  submitted_running_count: number;
+  count_delta: number;
+  duration_ms: number;
+  duration_per_deck_ms: number;
+  xp_delta: number;
+  xp: number;
+  rank: string;
+  hidden_cards: string[];
+  hidden_total_count: number;
 };
 
 type HandStatus =
@@ -115,5 +163,10 @@ export type {
   Profile,
   MeResponse,
   DashboardResponse,
+  PracticeMode,
+  PracticeSpeedTier,
+  PracticeRecentRun,
+  PracticeRunStartResponse,
+  PracticeRunSubmitResponse,
   PlayState,
 };

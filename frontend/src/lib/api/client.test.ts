@@ -41,4 +41,24 @@ describe("resolveApiUrl", () => {
       "VITE_API_URL must be set for production builds.",
     );
   });
+
+  it("throws when production api variable is not absolute", () => {
+    expect(
+      () =>
+        resolveApiUrl({
+          DEV: false,
+          VITE_API_URL: "backend-service-production-181c.up.railway.app/api",
+        }),
+    ).toThrow("VITE_API_URL must be an absolute URL in production");
+  });
+
+  it("throws when production api variable does not include /api", () => {
+    expect(
+      () =>
+        resolveApiUrl({
+          DEV: false,
+          VITE_API_URL: "https://backend-service-production-181c.up.railway.app",
+        }),
+    ).toThrow("VITE_API_URL must include the /api path");
+  });
 });
