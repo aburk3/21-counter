@@ -189,3 +189,16 @@ class AuthTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 400)
+
+    @override_settings(CORS_ALLOWED_ORIGINS=["https://21-counter.vercel.app"])
+    def test_preflight_allows_configured_origin(self):
+        response = self.client.options(
+            "/api/auth/register",
+            HTTP_ORIGIN="https://21-counter.vercel.app",
+            HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST",
+            HTTP_ACCESS_CONTROL_REQUEST_HEADERS="content-type",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response["Access-Control-Allow-Origin"], "https://21-counter.vercel.app"
+        )
