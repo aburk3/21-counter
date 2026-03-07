@@ -51,11 +51,14 @@ vi.mock("@/hooks/useDashboard", () => ({
 }));
 
 describe("Dashboard page", () => {
-  it("renders dashboard metrics", () => {
+  it("renders overview metrics and stats CTA", () => {
     renderWithProviders(<Dashboard />);
     expect(screen.getByText(DASHBOARD_TEXT.TITLE)).toBeInTheDocument();
-    expect(screen.getByText(DASHBOARD_TEXT.STATS.CORRECT_COUNT_GAMES)).toBeInTheDocument();
-    expect(screen.getByText("$640")).toBeInTheDocument();
+    expect(screen.getByText(DASHBOARD_TEXT.KEY_METRICS)).toBeInTheDocument();
+    expect(screen.getByText("Rank: Spotter")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: DASHBOARD_TEXT.PLAY })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: DASHBOARD_TEXT.VIEW_STATS })).toBeInTheDocument();
+    expect(screen.queryByText("Correct Count Sessions")).not.toBeInTheDocument();
   });
 
   it("opens refill confirmation modal", async () => {

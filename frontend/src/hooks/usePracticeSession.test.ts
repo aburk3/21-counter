@@ -75,6 +75,49 @@ describe("usePracticeSession", () => {
     expect(result.current.revealedCount).toBe(1);
   });
 
+  it("pauses and resumes auto reveal progression", async () => {
+    mockApi.startPracticeRun.mockResolvedValue({
+      run_id: 11,
+      decks: 1,
+      mode: "auto",
+      speed_tier: "beginner",
+      target_duration_ms: 2400,
+      hidden_cards_count: 3,
+      visible_cards_count: 4,
+      visible_cards: ["AS", "2D", "3C", "4H"],
+      started_at: "2026-03-05T12:00:00Z",
+    });
+
+    const { result } = renderHook(() => usePracticeSession());
+
+    await act(async () => {
+      await result.current.startRun();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    const beforePause = result.current.revealedCount;
+
+    act(() => {
+      result.current.pause();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(result.current.isPaused).toBe(true);
+    expect(result.current.revealedCount).toBe(beforePause);
+
+    act(() => {
+      result.current.resume();
+    });
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
+    expect(result.current.revealedCount).toBeGreaterThan(beforePause);
+  });
+
   it("submits and resolves run feedback", async () => {
     mockApi.startPracticeRun.mockResolvedValue({
       run_id: 10,

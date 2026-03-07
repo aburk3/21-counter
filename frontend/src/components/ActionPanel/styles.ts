@@ -7,6 +7,9 @@ const Wrap = styled.div`
 
   button {
     min-width: 98px;
+    flex: 1 1 110px;
+    justify-content: center;
+    text-align: center;
   }
 
   button:not(:disabled):hover {
@@ -14,7 +17,7 @@ const Wrap = styled.div`
     transform: none;
   }
 
-  @media ${({ theme }) => theme.media.sm} {
+  @media ${({ theme }) => theme.media.mobile} {
     button {
       flex: 1 1 calc(50% - 6px);
     }

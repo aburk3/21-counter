@@ -20,6 +20,10 @@ const UtilityBar = styled(GlassSurface)`
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+
+  @media ${({ theme }) => theme.media.mobile} {
+    padding: 10px;
+  }
 `;
 
 const UtilityMeta = styled.div`
@@ -38,6 +42,10 @@ const UtilityActions = styled.div`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+
+  button {
+    flex: 1 1 120px;
+  }
 `;
 
 const Layout = styled.section`
@@ -60,7 +68,7 @@ const Dock = styled(GlassSurface)`
   gap: 12px;
   align-content: start;
 
-  @media ${({ theme }) => theme.media.sm} {
+  @media ${({ theme }) => theme.media.mobile} {
     position: sticky;
     bottom: 8px;
     z-index: 18;
@@ -77,6 +85,7 @@ const DockRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
 `;
 
 const DockLabel = styled.span`

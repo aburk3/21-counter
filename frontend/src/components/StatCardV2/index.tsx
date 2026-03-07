@@ -1,5 +1,5 @@
 import { GlassSurface } from "@/components/ui/GlassSurface";
-import { Trend, Value, Wrap } from "./styles";
+import { Label, Trend, Value, Wrap } from "./styles";
 
 type TrendState = "up" | "down" | "neutral";
 
@@ -19,7 +19,7 @@ const trendLabel: Record<TrendState, string> = {
 const StatCardV2 = ({ label, value, trend = "neutral", helper }: StatCardV2Props) => {
   return (
     <GlassSurface as={Wrap} $elevation={1}>
-      <div>{label}</div>
+      <Label>{label}</Label>
       <Value>{value}</Value>
       <Trend $trend={trend}>{helper ?? trendLabel[trend]}</Trend>
     </GlassSurface>

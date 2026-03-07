@@ -5,7 +5,18 @@ import { RankBadge } from "@/components/RankBadge";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { GlassSurface } from "@/components/ui/GlassSurface";
 import { api, clearTokens } from "@/lib/api";
-import { Body, Crumb, Left, MenuCard, MenuWrap, Right, ShellBody, ShellHead, Wrap } from "./styles";
+import {
+  Body,
+  Crumb,
+  Left,
+  MenuCard,
+  MenuWrap,
+  Right,
+  ShellBody,
+  ShellHead,
+  UserControls,
+  Wrap,
+} from "./styles";
 
 type AppShellProps = {
   title: string;
@@ -61,30 +72,32 @@ const AppShell = ({ title, context, children }: AppShellProps) => {
         </Left>
         <Crumb>{context}</Crumb>
         <Right>
-          <RankBadge rank={rank} />
-          <MenuWrap ref={menuRef}>
-            <GlassButton
-              $variant="secondary"
-              aria-label="Open profile menu"
-              onClick={() => setMenuOpen((open) => !open)}
-            >
-              {email}
-            </GlassButton>
-            {menuOpen ? (
-              <GlassSurface as={MenuCard} $elevation={2}>
-                <GlassButton
-                  $variant="destructive"
-                  $full
-                  onClick={() => {
-                    clearTokens();
-                    navigate("/auth");
-                  }}
-                >
-                  Logout
-                </GlassButton>
-              </GlassSurface>
-            ) : null}
-          </MenuWrap>
+          <UserControls>
+            <RankBadge rank={rank} />
+            <MenuWrap ref={menuRef}>
+              <GlassButton
+                $variant="secondary"
+                aria-label="Open profile menu"
+                onClick={() => setMenuOpen((open) => !open)}
+              >
+                {email}
+              </GlassButton>
+              {menuOpen ? (
+                <GlassSurface as={MenuCard} $elevation={2}>
+                  <GlassButton
+                    $variant="destructive"
+                    $full
+                    onClick={() => {
+                      clearTokens();
+                      navigate("/auth");
+                    }}
+                  >
+                    Logout
+                  </GlassButton>
+                </GlassSurface>
+              ) : null}
+            </MenuWrap>
+          </UserControls>
         </Right>
       </ShellHead>
       <ShellBody>

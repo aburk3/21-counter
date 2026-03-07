@@ -52,17 +52,20 @@ const Header = styled.div`
 const HandRow = styled.div`
   display: flex;
   gap: 10px;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
 `;
 
 const Label = styled.div<{ $isPrimary?: boolean }>`
-  min-width: 96px;
+  flex: 0 1 96px;
   font-weight: ${({ $isPrimary }) => ($isPrimary ? 800 : 700)};
   color: ${({ theme, $isPrimary }) =>
     $isPrimary ? theme.colors.accent : theme.colors.textSubtle};
-  @media ${({ theme }) => theme.media.sm} {
-    min-width: 78px;
+  line-height: 1.25;
+
+  @media ${({ theme }) => theme.media.mobile} {
+    flex-basis: auto;
+    min-width: 0;
     font-size: 13px;
   }
 `;
@@ -141,6 +144,7 @@ const Cards = styled.div`
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  min-width: 0;
 `;
 
 export {

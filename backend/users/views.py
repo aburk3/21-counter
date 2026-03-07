@@ -7,6 +7,7 @@ from django.db import transaction
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.conf import settings
+from smtplib import SMTPException
 from rest_framework import permissions, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.throttling import ScopedRateThrottle
@@ -70,9 +71,28 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        raw_token, _ = create_email_verification_token(user=user)
-        send_verification_email(user=user, raw_token=raw_token)
+        try:
+            with transaction.atomic():
+                user = serializer.save()
+                raw_token, _ = create_email_verification_token(user=user)
+                send_verification_email(user=user, raw_token=raw_token)
+        except (SMTPException, OSError):
+            log_auth_event(
+                "register",
+                success=False,
+                email=serializer.validated_data["email"],
+                ip_address=_client_ip(request),
+                metadata={"reason": "email_delivery_failed"},
+            )
+            return Response(
+                {
+                    "detail": (
+                        "Account verification email could not be sent. "
+                        "Please try again shortly."
+                    )
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         log_auth_event(
             "register",
             success=True,

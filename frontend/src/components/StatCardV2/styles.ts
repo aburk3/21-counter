@@ -3,13 +3,27 @@ import styled from "styled-components";
 const Wrap = styled.article`
   padding: 14px;
   display: grid;
-  gap: 6px;
+  gap: 8px;
+  align-content: start;
+  min-height: 132px;
+
+  @media ${({ theme }) => theme.media.mobile} {
+    min-height: auto;
+  }
+`;
+
+const Label = styled.div`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: 12px;
+  line-height: 1.35;
+  letter-spacing: 0.03em;
 `;
 
 const Value = styled.div`
-  font-size: clamp(24px, 2.3vw, 30px);
+  font-size: clamp(24px, 6.4vw, 30px);
   font-weight: 700;
-  line-height: 1.05;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
 `;
 
 const Trend = styled.span<{ $trend: "up" | "down" | "neutral" }>`
@@ -31,8 +45,9 @@ const Trend = styled.span<{ $trend: "up" | "down" | "neutral" }>`
         : "rgba(255, 255, 255, 0.1)"};
   color: ${({ theme }) => theme.colors.textSecondary};
   font-size: 11px;
-  letter-spacing: 0.04em;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 `;
 
-export { Wrap, Value, Trend };
+export { Wrap, Label, Value, Trend };

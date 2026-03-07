@@ -5,6 +5,7 @@ import { RankBadge } from "@/components/RankBadge";
 import { StatCardV2 } from "@/components/StatCardV2";
 import { GlassButton } from "@/components/ui/GlassButton";
 import { useDashboard } from "@/hooks/useDashboard";
+import { getMetricsByTier } from "@/lib/stats/metrics";
 import {
   DASHBOARD_RANK_LABELS,
   DASHBOARD_SKIN_LABELS,
@@ -13,13 +14,12 @@ import {
 
 import {
   ErrorText,
-  Grid,
   Hero,
   HeroActions,
   HeroMeta,
-  HeroStats,
   HeroTop,
   Message,
+  MetricGrid,
   ModalActions,
   ModalBackdrop,
   ModalCard,
@@ -28,7 +28,10 @@ import {
   PracticeMeta,
   PracticeRow,
   ProgressBar,
+  ProgressBlock,
   ProgressFill,
+  ProgressRow,
+  SectionTitle,
   SkinItem,
   SkinItemBody,
   SkinLabel,
@@ -42,6 +45,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { data, loading, error, message, refillChips, selectSkin } = useDashboard();
   const [refillOpen, setRefillOpen] = useState(false);
+
   const projected = useMemo(() => {
     if (!data) return null;
     const nextXp = Math.max(0, data.xp - 75);
@@ -60,6 +64,9 @@ const Dashboard = () => {
 
   if (loading) return <Wrap>{DASHBOARD_TEXT.LOADING_DASHBOARD}</Wrap>;
   if (error || !data) return <Wrap>{error ?? DASHBOARD_TEXT.DASHBOARD_UNAVAILABLE}</Wrap>;
+
+  const overviewMetrics = getMetricsByTier(data, "overview");
+  const recentRuns = data.practice_recent_runs.slice(0, 3);
 
   return (
     <Wrap>
@@ -80,83 +87,70 @@ const Dashboard = () => {
             <GlassButton $variant="ghost" onClick={() => navigate("/practice")}>
               {DASHBOARD_TEXT.PRACTICE}
             </GlassButton>
+            <GlassButton $variant="secondary" onClick={() => navigate("/stats")}>
+              {DASHBOARD_TEXT.VIEW_STATS}
+            </GlassButton>
           </HeroActions>
         </HeroTop>
 
-        <div>
-          <div>{`${DASHBOARD_TEXT.STATS.XP}: ${data.xp}`}</div>
+        <ProgressBlock>
+          <ProgressRow>
+            <span>{`${DASHBOARD_TEXT.XP}: ${data.xp}`}</span>
+            <span>
+              {DASHBOARD_TEXT.progressionToNext(
+                data.xp_to_next_rank,
+                data.next_rank
+                  ? (DASHBOARD_RANK_LABELS[data.next_rank] ?? data.next_rank)
+                  : null,
+              )}
+            </span>
+          </ProgressRow>
           <ProgressBar>
             <ProgressFill $pct={data.rank_progress_pct} />
           </ProgressBar>
-          <div>
-            {DASHBOARD_TEXT.progressionToNext(
-              data.xp_to_next_rank,
-              data.next_rank
-                ? (DASHBOARD_RANK_LABELS[data.next_rank] ?? data.next_rank)
-                : null,
-            )}
-          </div>
-        </div>
-
-        <HeroStats>
-          <StatCardV2
-            label={DASHBOARD_TEXT.STATS.CURRENT_STREAK}
-            value={data.current_streak}
-            trend={data.current_streak >= 3 ? "up" : "neutral"}
-          />
-          <StatCardV2
-            label={DASHBOARD_TEXT.STATS.CHIPS}
-            value={`$${data.chips}`}
-            trend={data.chips >= 500 ? "up" : "down"}
-          />
-          <StatCardV2
-            label={DASHBOARD_TEXT.STATS.COUNT_ACCURACY}
-            value={`${data.accuracy_pct}%`}
-            trend={data.accuracy_pct >= 70 ? "up" : "down"}
-          />
-        </HeroStats>
+        </ProgressBlock>
       </Hero>
 
-      <Grid>
-        <StatCardV2
-          label={DASHBOARD_TEXT.STATS.CORRECT_COUNT_GAMES}
-          value={data.correct_count_games}
-          trend={data.correct_count_games >= 5 ? "up" : "neutral"}
-        />
-        <StatCardV2
-          label={DASHBOARD_TEXT.STATS.STRATEGY_CORRECT}
-          value={`${data.strategy_correct_pct}%`}
-          trend={data.strategy_correct_pct >= 70 ? "up" : "down"}
-        />
-        <StatCardV2
-          label={DASHBOARD_TEXT.STATS.AVG_TIME}
-          value={`${(data.avg_decision_ms / 1000).toFixed(2)}s`}
-          trend={data.avg_decision_ms <= 10000 ? "up" : "down"}
-        />
-        <StatCardV2
-          label={DASHBOARD_TEXT.STATS.TOTAL_SESSIONS}
-          value={data.total_games}
-          trend="neutral"
-        />
-        <StatCardV2
-          label={DASHBOARD_TEXT.STATS.PRACTICE_ACCURACY}
-          value={`${data.practice_accuracy_pct}%`}
-          trend={data.practice_accuracy_pct >= 70 ? "up" : "down"}
-        />
-        <StatCardV2
-          label={DASHBOARD_TEXT.STATS.PRACTICE_AVG}
-          value={`${(data.practice_avg_ms_per_deck / 1000).toFixed(2)}s`}
-          trend={data.practice_avg_ms_per_deck <= 45000 ? "up" : "neutral"}
-        />
-        <StatCardV2
-          label={DASHBOARD_TEXT.STATS.PRACTICE_STREAK}
-          value={data.practice_best_streak}
-          trend={data.practice_best_streak >= 3 ? "up" : "neutral"}
-        />
-      </Grid>
+      <section>
+        <SectionTitle>{DASHBOARD_TEXT.KEY_METRICS}</SectionTitle>
+        <MetricGrid>
+          {overviewMetrics.map((metric) => (
+            <StatCardV2
+              key={metric.id}
+              label={metric.label}
+              value={metric.value}
+              trend={metric.trend}
+              helper={metric.helper}
+            />
+          ))}
+        </MetricGrid>
+      </section>
 
       <ZoneGrid>
-        <Panel>
+        <Panel $elevation={1}>
+          <h3>{DASHBOARD_TEXT.PRACTICE_TITLE}</h3>
+          <p>
+            {`Runs ${data.practice_total_runs} • Correct ${data.practice_correct_runs} • Accuracy ${data.practice_accuracy_pct}%`}
+          </p>
+          <h4>{DASHBOARD_TEXT.PRACTICE_RECENT}</h4>
+          <PracticeList>
+            {recentRuns.length ? (
+              recentRuns.map((run) => (
+                <PracticeRow key={run.id} $elevation={1}>
+                  <strong>{DASHBOARD_TEXT.practiceRunLabel(run.mode, run.speed_tier, run.decks)}</strong>
+                  <PracticeMeta>
+                    <span>{`${(run.duration_ms / 1000).toFixed(2)}s`}</span>
+                    <span>{DASHBOARD_TEXT.practiceRunResult(run.is_correct, run.xp_delta)}</span>
+                  </PracticeMeta>
+                </PracticeRow>
+              ))
+            ) : (
+              <p>No practice runs yet.</p>
+            )}
+          </PracticeList>
+        </Panel>
+
+        <Panel $elevation={1}>
           <h3>{DASHBOARD_TEXT.UNLOCKS_TITLE}</h3>
           <SkinList>
             {Object.entries(DASHBOARD_SKIN_LABELS).map(([key, label]) => {
@@ -176,9 +170,7 @@ const Dashboard = () => {
                 >
                   <SkinItemBody>
                     <SkinPreviewCard $skin={key}>A♥</SkinPreviewCard>
-                    <SkinLabel>
-                      {`${label}${selected ? ` (${DASHBOARD_TEXT.SELECTED})` : ""}`}
-                    </SkinLabel>
+                    <SkinLabel>{`${label}${selected ? ` (${DASHBOARD_TEXT.SELECTED})` : ""}`}</SkinLabel>
                   </SkinItemBody>
                 </SkinItem>
               );
@@ -193,30 +185,7 @@ const Dashboard = () => {
           </p>
         </Panel>
 
-        <Panel>
-          <h3>{DASHBOARD_TEXT.PRACTICE_TITLE}</h3>
-          <p>
-            {`Runs ${data.practice_total_runs} • Correct ${data.practice_correct_runs} • Accuracy ${data.practice_accuracy_pct}%`}
-          </p>
-          <h4>{DASHBOARD_TEXT.PRACTICE_RECENT}</h4>
-          <PracticeList>
-            {data.practice_recent_runs.length ? (
-              data.practice_recent_runs.map((run) => (
-                <PracticeRow key={run.id} $elevation={1}>
-                  <strong>{DASHBOARD_TEXT.practiceRunLabel(run.mode, run.speed_tier, run.decks)}</strong>
-                  <PracticeMeta>
-                    <span>{`${(run.duration_ms / 1000).toFixed(2)}s`}</span>
-                    <span>{DASHBOARD_TEXT.practiceRunResult(run.is_correct, run.xp_delta)}</span>
-                  </PracticeMeta>
-                </PracticeRow>
-              ))
-            ) : (
-              <p>No practice runs yet.</p>
-            )}
-          </PracticeList>
-        </Panel>
-
-        <Panel>
+        <Panel $elevation={1}>
           <h3>{DASHBOARD_TEXT.BANKROLL_TITLE}</h3>
           <p>{DASHBOARD_TEXT.BANKROLL_WARNING}</p>
           <GlassButton $variant="destructive" onClick={() => setRefillOpen(true)}>

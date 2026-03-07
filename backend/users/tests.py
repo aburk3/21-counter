@@ -25,6 +25,17 @@ class AuthTests(APITestCase):
         self.assertFalse(user.is_email_verified)
         self.assertEqual(len(mail.outbox), 1)
 
+    @patch("users.views.send_verification_email", side_effect=OSError("smtp down"))
+    def test_register_rolls_back_if_verification_email_fails(self, _mock_send):
+        response = self.client.post(
+            "/api/auth/register",
+            {"email": "smtpfail@example.com", "password": "Passw0rd!!"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 503)
+        self.assertIn("could not be sent", response.data["detail"])
+        self.assertFalse(User.objects.filter(email="smtpfail@example.com").exists())
+
     def test_login_is_blocked_until_verified(self):
         user = User.objects.create_user(
             email="blocked@example.com",

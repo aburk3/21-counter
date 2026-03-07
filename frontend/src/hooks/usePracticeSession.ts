@@ -29,11 +29,14 @@ const usePracticeSession = () => {
   const [result, setResult] = useState<PracticeRunSubmitResponse | null>(null);
   const [revealedCount, setRevealedCount] = useState(0);
   const [startMs, setStartMs] = useState<number | null>(null);
+  const [elapsedOffsetMs, setElapsedOffsetMs] = useState(0);
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const revealNext = useCallback(() => {
+    if (isPaused) return;
     setRevealedCount((prev) => {
       const maxCards = run?.visible_cards.length ?? 0;
       if (prev >= maxCards) return prev;
@@ -42,19 +45,22 @@ const usePracticeSession = () => {
       }
       const next = prev + 1;
       if (next >= maxCards) {
+        const finalElapsed = elapsedOffsetMs + (startMs !== null ? Date.now() - startMs : 0);
         setStage("awaiting_submit");
-        setElapsedMs((value) => (value > 0 ? value : Date.now() - (startMs ?? Date.now())));
+        setElapsedMs(finalElapsed);
       }
       return next;
     });
-  }, [run?.visible_cards.length, run?.mode, startMs]);
+  }, [elapsedOffsetMs, isPaused, run?.visible_cards.length, run?.mode, startMs]);
 
   const startRun = async () => {
     setError(null);
     setResult(null);
     setElapsedMs(0);
+    setElapsedOffsetMs(0);
     setRevealedCount(0);
     setStartMs(null);
+    setIsPaused(false);
     try {
       const response = await api.startPracticeRun(setup);
       setRun(response);
@@ -84,14 +90,36 @@ const usePracticeSession = () => {
     setResult(null);
     setRevealedCount(0);
     setStartMs(null);
+    setElapsedOffsetMs(0);
     setElapsedMs(0);
+    setIsPaused(false);
     setError(null);
     setStage("idle");
+  };
+
+  const pause = () => {
+    if (stage !== "running" || isPaused) return;
+    if (startMs !== null) {
+      const accrued = elapsedOffsetMs + (Date.now() - startMs);
+      setElapsedOffsetMs(accrued);
+      setElapsedMs(accrued);
+      setStartMs(null);
+    }
+    setIsPaused(true);
+  };
+
+  const resume = () => {
+    if (stage !== "running" || !isPaused) return;
+    if (run?.mode === "auto" || revealedCount > 0) {
+      setStartMs(Date.now());
+    }
+    setIsPaused(false);
   };
 
   useEffect(() => {
     if (stage !== "running") return;
     if (run?.mode !== "auto") return;
+    if (isPaused) return;
     const totalCards = run.visible_cards.length;
     if (!totalCards) {
       setStage("awaiting_submit");
@@ -106,22 +134,24 @@ const usePracticeSession = () => {
     return () => {
       window.clearInterval(id);
     };
-  }, [stage, run, revealNext]);
+  }, [isPaused, stage, run, revealNext]);
 
   useEffect(() => {
     if (stage !== "running") return;
     if (startMs === null) return;
+    if (isPaused) return;
     const id = window.setInterval(() => {
-      setElapsedMs(Date.now() - startMs);
+      setElapsedMs(elapsedOffsetMs + (Date.now() - startMs));
     }, 80);
     return () => {
       window.clearInterval(id);
     };
-  }, [stage, startMs]);
+  }, [elapsedOffsetMs, isPaused, stage, startMs]);
 
   useEffect(() => {
     if (stage !== "running") return;
     if (run?.mode !== "manual") return;
+    if (isPaused) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== "Space") return;
       event.preventDefault();
@@ -131,7 +161,7 @@ const usePracticeSession = () => {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [stage, run?.mode, revealNext]);
+  }, [isPaused, stage, run?.mode, revealNext]);
 
   const activeCard = useMemo(() => {
     if (!run || revealedCount <= 0) return null;
@@ -147,11 +177,15 @@ const usePracticeSession = () => {
     revealedCount,
     activeCard,
     elapsedMs,
+    isPaused,
     submitting,
     error,
-    canReveal: stage === "running" && run?.mode === "manual",
+    canReveal: stage === "running" && !isPaused && run?.mode === "manual",
+    canPause: stage === "running",
     startRun,
     revealNext,
+    pause,
+    resume,
     submitCount,
     reset,
   };

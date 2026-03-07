@@ -21,15 +21,10 @@ const TopRow = styled.div`
   gap: 10px;
 `;
 
-const SetupGrid = styled(GlassSurface)`
-  padding: 14px;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-
-  @media ${({ theme }) => theme.media.lg} {
-    grid-template-columns: 1fr;
-  }
+const HeroActions = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 `;
 
 const Field = styled.label`
@@ -60,6 +55,7 @@ const Stepper = styled.div`
   place-items: center;
   font-size: 20px;
   font-family: "SF Mono", "Menlo", monospace;
+  line-height: 1;
 `;
 
 const Board = styled(GlassSurface)`
@@ -83,6 +79,11 @@ const DeckArea = styled.button`
   place-items: center;
   min-height: 220px;
   cursor: pointer;
+
+  @media ${({ theme }) => theme.media.mobile} {
+    min-height: 190px;
+    padding: 14px;
+  }
 `;
 
 const Placeholder = styled.div`
@@ -103,7 +104,7 @@ const SubmitRow = styled.div`
   gap: 10px;
   grid-template-columns: 1fr auto;
 
-  @media ${({ theme }) => theme.media.sm} {
+  @media ${({ theme }) => theme.media.mobile} {
     grid-template-columns: 1fr;
   }
 `;
@@ -143,11 +144,47 @@ const ErrorText = styled.p`
   color: ${({ theme }) => theme.colors.danger};
 `;
 
+const SettingsBackdrop = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 14, 11, 0.56);
+  display: grid;
+  place-items: center;
+  z-index: 40;
+`;
+
+const SettingsCard = styled(GlassSurface)`
+  width: min(620px, calc(100vw - 16px));
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+`;
+
+const SettingsGrid = styled.div`
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  @media ${({ theme }) => theme.media.tablet} {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media ${({ theme }) => theme.media.mobile} {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const SettingsActions = styled.div`
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
+
 export {
   Wrap,
   Hero,
   TopRow,
-  SetupGrid,
+  HeroActions,
   Field,
   FieldLabel,
   StepperRow,
@@ -162,4 +199,8 @@ export {
   ResultCard,
   HiddenCards,
   ErrorText,
+  SettingsBackdrop,
+  SettingsCard,
+  SettingsGrid,
+  SettingsActions,
 };

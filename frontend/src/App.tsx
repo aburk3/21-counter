@@ -7,6 +7,7 @@ import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import Play from "@/pages/Play";
 import Practice from "@/pages/Practice";
+import Stats from "@/pages/Stats";
 
 const PrivateRoute = ({ children }: { children: ReactElement }) => {
   if (!hasToken()) {
@@ -45,6 +46,16 @@ const App = () => {
           <PrivateRoute>
             <AppShell title="Count Practice Lab" context="Count Practice">
               <Practice />
+            </AppShell>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/stats"
+        element={
+          <PrivateRoute>
+            <AppShell title="Detailed Stats" context="Performance Metrics">
+              <Stats />
             </AppShell>
           </PrivateRoute>
         }

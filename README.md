@@ -54,6 +54,31 @@ export GOOGLE_OAUTH_CLIENT_SECRET=""
 export GOOGLE_OAUTH_REDIRECT_URI="http://localhost:8000/api/auth/google/callback"
 ```
 
+### Email Verification Setup (Production)
+
+Registration requires sending a verification email. Configure SMTP on the backend
+service.
+
+Example (Resend SMTP):
+
+```bash
+export DJANGO_EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
+export EMAIL_HOST="smtp.resend.com"
+export EMAIL_PORT="587"
+export EMAIL_HOST_USER="resend"
+export EMAIL_HOST_PASSWORD="<resend-api-key>"
+export EMAIL_USE_TLS="1"
+export DEFAULT_FROM_EMAIL="no-reply@your-domain.com"
+export FRONTEND_EMAIL_VERIFY_URL="https://<your-frontend-domain>/auth"
+```
+
+Notes:
+- Set these in Railway backend service Variables for production.
+- If SMTP is unavailable, registration returns `503` and user creation is rolled
+  back.
+- For local development, you can use:
+  - `DJANGO_EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend`
+
 If `POSTGRES_DB` is not set, backend uses `backend/db.sqlite3` for local development.
 
 ### 3) Create database and run migrations

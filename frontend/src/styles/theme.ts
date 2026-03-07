@@ -52,6 +52,10 @@ const theme = {
     pill: "999px",
   },
   media: {
+    mobile: "(max-width: 767px)",
+    tablet: "(min-width: 768px) and (max-width: 1024px)",
+    desktopCompact: "(min-width: 1025px) and (max-width: 1280px)",
+    desktop: "(min-width: 1281px)",
     sm: "(max-width: 480px)",
     md: "(min-width: 481px) and (max-width: 767px)",
     lg: "(min-width: 768px) and (max-width: 1024px)",

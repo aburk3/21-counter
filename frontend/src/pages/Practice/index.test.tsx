@@ -24,11 +24,15 @@ const mockHook = {
   revealedCount: 0,
   activeCard: null,
   elapsedMs: 1200,
+  isPaused: false,
   submitting: false,
   error: null,
   canReveal: true,
+  canPause: true,
   startRun: vi.fn(),
   revealNext: vi.fn(),
+  pause: vi.fn(),
+  resume: vi.fn(),
   submitCount: vi.fn(),
   reset: vi.fn(),
 };
@@ -47,6 +51,8 @@ describe("Practice page", () => {
     expect(screen.getByText(PRACTICE_TEXT.TITLE)).toBeInTheDocument();
     expect(screen.getByText(PRACTICE_TEXT.HIDDEN_HINT)).toBeInTheDocument();
     expect(screen.getByText(PRACTICE_TEXT.MANUAL_HINT)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: PRACTICE_TEXT.PAUSE })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: PRACTICE_TEXT.OPEN_SETTINGS })).toBeInTheDocument();
   });
 
   it("reveals next card on deck click in manual mode", async () => {

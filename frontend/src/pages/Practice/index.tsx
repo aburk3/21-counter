@@ -15,12 +15,16 @@ import {
   Field,
   FieldLabel,
   Hero,
+  HeroActions,
   HiddenCards,
   Input,
   Placeholder,
   ResultBackdrop,
   ResultCard,
-  SetupGrid,
+  SettingsActions,
+  SettingsBackdrop,
+  SettingsCard,
+  SettingsGrid,
   Stepper,
   StepperRow,
   SubmitRow,
@@ -33,6 +37,7 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
 const Practice = () => {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const {
     setup,
     setSetup,
@@ -42,11 +47,15 @@ const Practice = () => {
     revealedCount,
     activeCard,
     elapsedMs,
+    isPaused,
     submitting,
     error,
     canReveal,
+    canPause,
     startRun,
     revealNext,
+    pause,
+    resume,
     submitCount,
     reset,
   } = usePracticeSession();
@@ -69,67 +78,34 @@ const Practice = () => {
             <h1>{PRACTICE_TEXT.TITLE}</h1>
             <p>{PRACTICE_TEXT.SUBTITLE}</p>
           </div>
-          <GlassButton $variant="secondary" onClick={() => navigate("/dashboard")}>
-            {PRACTICE_TEXT.DASHBOARD}
-          </GlassButton>
+          <HeroActions>
+            <GlassButton
+              aria-label={PRACTICE_TEXT.OPEN_SETTINGS}
+              $variant="secondary"
+              onClick={() => setSettingsOpen(true)}
+            >
+              {PRACTICE_TEXT.SETTINGS_ICON}
+            </GlassButton>
+            <GlassButton
+              $variant="secondary"
+              disabled={!canPause}
+              onClick={() => {
+                if (isPaused) {
+                  resume();
+                } else {
+                  pause();
+                }
+              }}
+            >
+              {isPaused ? PRACTICE_TEXT.RESUME : PRACTICE_TEXT.PAUSE}
+            </GlassButton>
+            <GlassButton $variant="secondary" onClick={() => navigate("/dashboard")}>
+              {PRACTICE_TEXT.DASHBOARD}
+            </GlassButton>
+          </HeroActions>
         </TopRow>
         <p>{PRACTICE_TEXT.HIDDEN_HINT}</p>
       </Hero>
-
-      <SetupGrid $elevation={2}>
-        <Field>
-          <FieldLabel>{PRACTICE_TEXT.DECKS}</FieldLabel>
-          <StepperRow>
-            <GlassButton
-              $variant="ghost"
-              onClick={() => setSetup((prev) => ({ ...prev, decks: clamp(prev.decks - 1, 1, 8) }))}
-              disabled={isRunning}
-            >
-              -
-            </GlassButton>
-            <Stepper>{setup.decks}</Stepper>
-            <GlassButton
-              $variant="ghost"
-              onClick={() => setSetup((prev) => ({ ...prev, decks: clamp(prev.decks + 1, 1, 8) }))}
-              disabled={isRunning}
-            >
-              +
-            </GlassButton>
-          </StepperRow>
-        </Field>
-
-        <Field>
-          <FieldLabel>{PRACTICE_TEXT.MODE}</FieldLabel>
-          <SegmentedControl
-            value={setup.mode}
-            onChange={(value) => setSetup((prev) => ({ ...prev, mode: value as "auto" | "manual" }))}
-            ariaLabel="Practice mode"
-            options={[
-              { value: "auto", label: "Automatic" },
-              { value: "manual", label: "Manual" },
-            ]}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel>{PRACTICE_TEXT.SPEED}</FieldLabel>
-          <SegmentedControl
-            value={setup.speed_tier}
-            onChange={(value) =>
-              setSetup((prev) => ({
-                ...prev,
-                speed_tier: value as "beginner" | "intermediate" | "expert",
-              }))
-            }
-            ariaLabel="Practice speed"
-            options={[
-              { value: "beginner", label: "Beginner" },
-              { value: "intermediate", label: "Intermediate" },
-              { value: "expert", label: "Expert" },
-            ]}
-          />
-        </Field>
-      </SetupGrid>
 
       <Board $elevation={2}>
         <BoardMeta>
@@ -216,6 +192,88 @@ const Practice = () => {
             </GlassButton>
           </ResultCard>
         </ResultBackdrop>
+      ) : null}
+
+      {settingsOpen ? (
+        <SettingsBackdrop
+          onClick={() => {
+            setSettingsOpen(false);
+          }}
+        >
+          <SettingsCard
+            $elevation={3}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <h3>{PRACTICE_TEXT.SETTINGS_TITLE}</h3>
+            <p>{PRACTICE_TEXT.SETTINGS_HINT}</p>
+            <SettingsGrid>
+              <Field>
+                <FieldLabel>{PRACTICE_TEXT.DECKS}</FieldLabel>
+                <StepperRow>
+                  <GlassButton
+                    $variant="ghost"
+                    onClick={() => setSetup((prev) => ({ ...prev, decks: clamp(prev.decks - 1, 1, 8) }))}
+                    disabled={isRunning}
+                  >
+                    -
+                  </GlassButton>
+                  <Stepper>{setup.decks}</Stepper>
+                  <GlassButton
+                    $variant="ghost"
+                    onClick={() => setSetup((prev) => ({ ...prev, decks: clamp(prev.decks + 1, 1, 8) }))}
+                    disabled={isRunning}
+                  >
+                    +
+                  </GlassButton>
+                </StepperRow>
+              </Field>
+
+              <Field>
+                <FieldLabel>{PRACTICE_TEXT.MODE}</FieldLabel>
+                <SegmentedControl
+                  value={setup.mode}
+                  onChange={(value) =>
+                    setSetup((prev) => ({ ...prev, mode: value as "auto" | "manual" }))
+                  }
+                  ariaLabel="Practice mode"
+                  options={[
+                    { value: "auto", label: "Automatic" },
+                    { value: "manual", label: "Manual" },
+                  ]}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel>{PRACTICE_TEXT.SPEED}</FieldLabel>
+                <SegmentedControl
+                  value={setup.speed_tier}
+                  onChange={(value) =>
+                    setSetup((prev) => ({
+                      ...prev,
+                      speed_tier: value as "beginner" | "intermediate" | "expert",
+                    }))
+                  }
+                  ariaLabel="Practice speed"
+                  options={[
+                    { value: "beginner", label: "Beginner" },
+                    { value: "intermediate", label: "Intermediate" },
+                    { value: "expert", label: "Expert" },
+                  ]}
+                />
+              </Field>
+            </SettingsGrid>
+            <SettingsActions>
+              <GlassButton $variant="primary" onClick={() => setSettingsOpen(false)}>
+                {PRACTICE_TEXT.SETTINGS_SAVE}
+              </GlassButton>
+              <GlassButton $variant="ghost" onClick={() => setSettingsOpen(false)}>
+                {PRACTICE_TEXT.SETTINGS_CANCEL}
+              </GlassButton>
+            </SettingsActions>
+          </SettingsCard>
+        </SettingsBackdrop>
       ) : null}
     </Wrap>
   );

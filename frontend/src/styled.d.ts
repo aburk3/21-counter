@@ -55,6 +55,10 @@ declare module "styled-components" {
       pill: string;
     };
     media: {
+      mobile: string;
+      tablet: string;
+      desktopCompact: string;
+      desktop: string;
       sm: string;
       md: string;
       lg: string;
