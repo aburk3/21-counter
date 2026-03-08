@@ -8,6 +8,7 @@ vi.mock("@/hooks/useDashboard", () => ({
   useDashboard: () => ({
     loading: false,
     error: null,
+    email: "trainer@example.com",
     data: {
       correct_count_games: 7,
       total_games: 12,
@@ -55,6 +56,8 @@ describe("Stats page", () => {
     expect(screen.getByText(STATS_TEXT.TITLE)).toBeInTheDocument();
     expect(screen.getByText(STATS_TEXT.PERFORMANCE)).toBeInTheDocument();
     expect(screen.getByText("Correct Count Sessions")).toBeInTheDocument();
+    expect(screen.getByText("Count Accuracy")).toBeInTheDocument();
+    expect(screen.getByText(STATS_TEXT.PRACTICE_SNAPSHOT)).toBeInTheDocument();
     expect(screen.getByText(STATS_TEXT.RECENT_RUNS)).toBeInTheDocument();
   });
 });

@@ -6,13 +6,15 @@ import { DASHBOARD_TEXT } from "@/pages/Dashboard/constants";
 
 const useDashboard = () => {
   const [data, setData] = useState<DashboardResponse | null>(null);
+  const [email, setEmail] = useState<string>("trainer@21-counter");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const load = async () => {
-    const payload = await api.dashboard();
-    setData(payload);
+    const [dashboardPayload, mePayload] = await Promise.all([api.dashboard(), api.me()]);
+    setData(dashboardPayload);
+    setEmail(mePayload.email);
     setError(null);
     setLoading(false);
   };
@@ -46,7 +48,7 @@ const useDashboard = () => {
     await load();
   };
 
-  return { data, loading, error, message, refillChips, selectSkin };
+  return { data, email, loading, error, message, refillChips, selectSkin };
 };
 
 export { useDashboard };

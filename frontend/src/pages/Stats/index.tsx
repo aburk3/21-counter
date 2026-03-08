@@ -99,7 +99,15 @@ const Stats = () => {
         </Panel>
 
         <Panel $elevation={1}>
-          <h3>{STATS_TEXT.RECENT_RUNS}</h3>
+          <h3>{STATS_TEXT.PRACTICE_SNAPSHOT}</h3>
+          <p>
+            {STATS_TEXT.PRACTICE_SUMMARY(
+              data.practice_total_runs,
+              data.practice_correct_runs,
+              data.practice_accuracy_pct,
+            )}
+          </p>
+          <h4>{STATS_TEXT.RECENT_RUNS}</h4>
           <PracticeList>
             {data.practice_recent_runs.length ? (
               data.practice_recent_runs.map((run) => (

@@ -4,62 +4,79 @@ import { GlassSurface } from "@/components/ui/GlassSurface";
 
 const Wrap = styled.main`
   display: grid;
-  gap: 16px;
+  gap: 14px;
 `;
 
 const Hero = styled(GlassSurface)`
-  padding: 18px;
+  padding: 16px;
   display: grid;
-  gap: 14px;
+  gap: 10px;
 `;
 
 const HeroTop = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 12px;
-
-  @media ${({ theme }) => theme.media.mobile} {
-    grid-template-columns: 1fr;
-  }
 `;
 
-const HeroActions = styled.div`
+const HeroContent = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  justify-content: end;
   gap: 10px;
-  width: min(460px, 100%);
-  justify-self: end;
-
-  button {
-    min-height: 44px;
-  }
+  grid-template-columns: minmax(0, 1fr) auto;
 
   @media ${({ theme }) => theme.media.mobile} {
     grid-template-columns: 1fr;
-    justify-content: stretch;
-    justify-self: stretch;
-    width: 100%;
   }
 `;
 
 const HeroMeta = styled.div`
   display: grid;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
+
+  h1 {
+    margin: 0;
+    font-size: clamp(20px, 2.2vw, 26px);
+  }
 
   p {
     margin: 0;
     color: ${({ theme }) => theme.colors.textSecondary};
     line-height: 1.35;
-    max-width: 60ch;
+  }
+`;
+
+const IdentityLabel = styled.strong`
+  display: block;
+  font-size: 14px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+`;
+
+const MetaRow = styled.span`
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: 13px;
+`;
+
+const HeroUtility = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  button {
+    min-height: 36px;
+  }
+
+  @media ${({ theme }) => theme.media.mobile} {
+    justify-content: flex-start;
   }
 `;
 
 const ProgressBlock = styled.div`
   display: grid;
-  gap: 8px;
+  gap: 6px;
 `;
 
 const ProgressRow = styled.div`
@@ -69,14 +86,18 @@ const ProgressRow = styled.div`
   gap: 8px;
   flex-wrap: wrap;
   color: ${({ theme }) => theme.colors.textSecondary};
-  font-size: 14px;
+  font-size: 12px;
+`;
+
+const ProgressMeta = styled.span`
+  color: ${({ theme }) => theme.colors.textSubtle};
 `;
 
 const ProgressBar = styled.div`
   width: 100%;
-  height: 10px;
+  height: 6px;
   border-radius: ${({ theme }) => theme.radius.pill};
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.12);
   overflow: hidden;
 `;
 
@@ -87,58 +108,79 @@ const ProgressFill = styled.div<{ $pct: number }>`
   transition: width 320ms ease;
 `;
 
-const SectionTitle = styled.h2`
-  font-size: clamp(18px, 2vw, 22px);
-`;
-
-const MetricGrid = styled.section`
+const HeroActions = styled.div`
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
 
-  @media ${({ theme }) => theme.media.tablet} {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  button {
+    min-height: 44px;
   }
 
   @media ${({ theme }) => theme.media.mobile} {
     grid-template-columns: 1fr;
+  }
+`;
+
+const SecondaryActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  span {
+    color: ${({ theme }) => theme.colors.textSecondary};
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  button {
+    min-height: 34px;
   }
 `;
 
 const ZoneGrid = styled.section`
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-
-  @media ${({ theme }) => theme.media.desktopCompact} {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media ${({ theme }) => theme.media.mobile} {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: minmax(0, 1fr);
 `;
 
 const Panel = styled(GlassSurface)`
-  padding: 14px;
+  padding: 12px;
   display: grid;
   gap: 10px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 0;
+    color: ${({ theme }) => theme.colors.textSecondary};
+    font-size: 13px;
+  }
 `;
 
 const SkinList = styled.div`
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+
+  @media ${({ theme }) => theme.media.mobile} {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const SkinItem = styled.button<{ $locked: boolean; $selected: boolean }>`
   border: 1px solid
-    ${({ $selected }) => ($selected ? "rgba(133, 255, 236, 0.8)" : "rgba(255, 255, 255, 0.3)")};
+    ${({ $selected }) => ($selected ? "rgba(133, 255, 236, 0.8)" : "rgba(255, 255, 255, 0.28)")};
   border-radius: ${({ theme }) => theme.radius.md};
   padding: 10px;
   color: ${({ theme, $locked }) => ($locked ? theme.colors.textSubtle : theme.colors.text)};
-  opacity: ${({ $locked }) => ($locked ? 0.62 : 1)};
-  background: ${({ $selected }) => ($selected ? "rgba(101, 245, 223, 0.18)" : "rgba(255, 255, 255, 0.08)")};
+  opacity: ${({ $locked }) => ($locked ? 0.6 : 0.92)};
+  background: ${({ $selected }) => ($selected ? "rgba(101, 245, 223, 0.14)" : "rgba(255, 255, 255, 0.06)")};
   text-align: left;
   cursor: ${({ $locked }) => ($locked ? "not-allowed" : "pointer")};
 `;
@@ -190,39 +232,20 @@ const SkinPreviewCard = styled.div<{ $skin: string }>`
       color: ${tone.glyph};
     `;
   }}
-  width: 42px;
-  height: 60px;
+  width: 38px;
+  height: 54px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   font-size: 12px;
   font-weight: 800;
   display: grid;
   place-items: center;
 `;
 
-const PracticeList = styled.div`
-  display: grid;
-  gap: 8px;
-`;
-
-const PracticeRow = styled(GlassSurface)`
-  padding: 10px;
-  display: grid;
-  gap: 4px;
-`;
-
-const PracticeMeta = styled.div`
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-size: 12px;
-`;
-
 const Message = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.colors.success};
+  font-size: 13px;
 `;
 
 const ErrorText = styled.p`
@@ -243,7 +266,11 @@ const ModalCard = styled(GlassSurface)`
   width: min(560px, calc(100vw - 16px));
   padding: 22px;
   display: grid;
-  gap: 14px;
+  gap: 12px;
+
+  p {
+    margin: 0;
+  }
 `;
 
 const ModalActions = styled.div`
@@ -256,14 +283,18 @@ export {
   Wrap,
   Hero,
   HeroTop,
-  HeroActions,
+  HeroContent,
   HeroMeta,
+  IdentityLabel,
+  MetaRow,
+  HeroUtility,
   ProgressBlock,
   ProgressRow,
+  ProgressMeta,
   ProgressBar,
   ProgressFill,
-  SectionTitle,
-  MetricGrid,
+  HeroActions,
+  SecondaryActions,
   ZoneGrid,
   Panel,
   SkinList,
@@ -271,9 +302,6 @@ export {
   SkinItemBody,
   SkinLabel,
   SkinPreviewCard,
-  PracticeList,
-  PracticeRow,
-  PracticeMeta,
   Message,
   ErrorText,
   ModalBackdrop,

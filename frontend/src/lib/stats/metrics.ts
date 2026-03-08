@@ -44,20 +44,20 @@ const STAT_METRICS: StatMetricDefinition[] = [
     trend: (data) => (data.chips >= 500 ? "up" : "down"),
   },
   {
-    id: "count_accuracy",
-    label: "Count Accuracy",
-    tier: "overview",
-    section: "performance",
-    value: (data) => `${data.accuracy_pct}%`,
-    trend: (data) => (data.accuracy_pct >= 70 ? "up" : "down"),
-  },
-  {
     id: "correct_count_games",
     label: "Correct Count Sessions",
     tier: "detail",
     section: "performance",
     value: (data) => data.correct_count_games,
     trend: (data) => (data.correct_count_games >= 5 ? "up" : "neutral"),
+  },
+  {
+    id: "count_accuracy",
+    label: "Count Accuracy",
+    tier: "detail",
+    section: "performance",
+    value: (data) => `${data.accuracy_pct}%`,
+    trend: (data) => (data.accuracy_pct >= 70 ? "up" : "down"),
   },
   {
     id: "strategy_accuracy",

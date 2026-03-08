@@ -9,6 +9,7 @@ vi.mock("@/hooks/useDashboard", () => ({
   useDashboard: () => ({
     loading: false,
     error: null,
+    email: "trainer@example.com",
     data: {
       correct_count_games: 3,
       total_games: 5,
@@ -51,22 +52,28 @@ vi.mock("@/hooks/useDashboard", () => ({
 }));
 
 describe("Dashboard page", () => {
-  it("renders overview metrics and stats CTA", () => {
+  it("renders minimal dashboard with focused training actions", () => {
     renderWithProviders(<Dashboard />);
     expect(screen.getByText(DASHBOARD_TEXT.TITLE)).toBeInTheDocument();
-    expect(screen.getByText(DASHBOARD_TEXT.KEY_METRICS)).toBeInTheDocument();
+    expect(screen.getByText("trainer@example.com")).toBeInTheDocument();
     expect(screen.getByText("Rank: Spotter")).toBeInTheDocument();
+    expect(screen.getByText("Chips: $640")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: DASHBOARD_TEXT.REFILL_CHIPS })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: DASHBOARD_TEXT.PLAY })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: DASHBOARD_TEXT.VIEW_STATS })).toBeInTheDocument();
-    expect(screen.queryByText("Correct Count Sessions")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: DASHBOARD_TEXT.PRACTICE })).toBeInTheDocument();
+    expect(screen.getByText(DASHBOARD_TEXT.SECONDARY_ACTIONS)).toBeInTheDocument();
+    expect(screen.queryByText("Practice Snapshot")).not.toBeInTheDocument();
+    expect(screen.queryByText("Bankroll")).not.toBeInTheDocument();
+    expect(screen.queryByText("Key Metrics")).not.toBeInTheDocument();
   });
 
   it("opens refill confirmation modal", async () => {
     const user = userEvent.setup();
     renderWithProviders(<Dashboard />);
-    await user.click(screen.getByRole("button", { name: DASHBOARD_TEXT.BANKROLL_BUTTON }));
+    await user.click(screen.getByRole("button", { name: DASHBOARD_TEXT.REFILL_CHIPS }));
     expect(
       screen.getByRole("heading", { name: DASHBOARD_TEXT.REFILL_CONFIRM_TITLE }),
     ).toBeInTheDocument();
+    expect(screen.getByText(DASHBOARD_TEXT.REFILL_CONFIRM_MESSAGE)).toBeInTheDocument();
   });
 });

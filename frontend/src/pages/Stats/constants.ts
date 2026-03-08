@@ -5,7 +5,10 @@ const STATS_TEXT = {
   PERFORMANCE: "Performance",
   PROGRESSION: "Progression",
   PRACTICE: "Practice Analytics",
-  RECENT_RUNS: "Recent Practice Runs",
+  PRACTICE_SNAPSHOT: "Practice Snapshot",
+  PRACTICE_SUMMARY: (runs: number, correct: number, accuracy: number) =>
+    `Runs ${runs} • Correct ${correct} • Accuracy ${accuracy}%`,
+  RECENT_RUNS: "Recent Runs",
   EMPTY_RUNS: "No practice runs yet.",
   CURRENT_RANK: "Current Rank",
   NEXT_UNLOCK: "Next unlock",
